@@ -24,7 +24,7 @@ static bool calc_t(const Ray& ray, const Sphere& sphere, const double min_t,
 }
 
 bool Sphere::intersect(const Ray& ray, const double min_t, double& out_t,
-                       Eigen::Vector3d& out_n) const {
+                       Eigen::Vector3f& out_n) const {
     double t;
     if (!calc_t(ray, *this, min_t, t)) return false;
 

@@ -31,8 +31,8 @@
 *.un~
 *.swo
 *.swp
-build/*
-*.DS_Store
-
-solution/
+.DS_Store
 .cache/
+
+build/*
+.envrc

@@ -2,8 +2,8 @@
 
 #include <limits>
 
-void DirectionalLight::direction([[maybe_unused]] const Eigen::Vector3d& q,
-                                 Eigen::Vector3d& out_d,
+void DirectionalLight::direction([[maybe_unused]] const Eigen::Vector3f& q,
+                                 Eigen::Vector3f& out_d,
                                  double& out_max_t) const {
     out_d = -this->d;
     out_max_t = std::numeric_limits<
