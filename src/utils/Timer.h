@@ -6,7 +6,7 @@
 
 class Timer {
    public:
-    Timer(const std::string& name);
+    Timer(std::string name);
     ~Timer();
     void stop();
 

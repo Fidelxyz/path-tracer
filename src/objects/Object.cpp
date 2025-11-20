@@ -1,5 +1,7 @@
 #include "Object.h"
 
+#include <cassert>
+
 Object::Object(const std::shared_ptr<Material> material,
                const AABB bounding_box)
     : material(std::move(material)), bounding_box(std::move(bounding_box)) {}

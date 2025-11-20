@@ -1,7 +1,6 @@
 #include "read_json.h"
 
-#include <dirname.h>
-#include <readSTL.h>
+#include <igl/readSTL.h>
 
 #include <Eigen/Geometry>
 #include <cassert>
@@ -12,12 +11,6 @@
 #include "lights/PointLight.h"
 #include "objects/Sphere.h"
 #include "objects/Triangle.h"
-
-#if defined(WIN32) || defined(_WIN32)
-#define PATH_SEPARATOR std::string("\\")
-#else
-#define PATH_SEPARATOR std::string("/")
-#endif
 
 Scene read_json(const std::string& filename) {
     // Heavily borrowing from
@@ -109,22 +102,23 @@ Scene read_json(const std::string& filename) {
                     parse_Vector3f(jobj["corners"][2]), material));
 
             } else if (jobj["type"] == "soup") {
-                std::vector<std::vector<float>> V;
-                std::vector<std::vector<float>> F;
-                std::vector<std::vector<int>> N;
-                igl::readSTL(igl::dirname(filename) + PATH_SEPARATOR +
-                                 jobj["stl"].get<std::string>(),
-                             V, F, N);
+                std::ifstream stl_file(
+                    std::filesystem::path(filename).parent_path() / jobj["stl"],
+                    std::ios::binary);
+                if (!stl_file) {
+                    std::cerr << "Error opening STL file: "
+                              << jobj["stl"].get<std::string>() << std::endl;
+                    exit(EXIT_FAILURE);
+                }
 
-                for (size_t f = 0; f < F.size(); f++) {
+                Eigen::MatrixXf V;
+                Eigen::MatrixXi F;
+                Eigen::MatrixXf N;
+                igl::readSTL(stl_file, V, F, N);
+
+                for (const auto& f : F.rowwise()) {
                     objects.push_back(std::make_unique<Triangle>(
-                        Eigen::Vector3f(V[F[f][0]][0], V[F[f][0]][1],
-                                        V[F[f][0]][2]),
-                        Eigen::Vector3f(V[F[f][1]][0], V[F[f][1]][1],
-                                        V[F[f][1]][2]),
-                        Eigen::Vector3f(V[F[f][2]][0], V[F[f][2]][1],
-                                        V[F[f][2]][2]),
-                        material));
+                        V.row(f[0]), V.row(f[1]), V.row(f[2]), material));
                 }
             }
         }

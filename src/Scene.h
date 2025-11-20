@@ -1,6 +1,8 @@
 #ifndef SCENE_H
 #define SCENE_H
 
+#include <cassert>
+
 #include "Camera.h"
 #include "bvh/AABBTree.h"
 #include "lights/Light.h"

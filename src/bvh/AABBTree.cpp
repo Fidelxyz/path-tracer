@@ -1,6 +1,7 @@
 #include "AABBTree.h"
 
 #include <algorithm>
+#include <cassert>
 #include <memory>
 
 AABBTree::AABBTree(std::vector<std::unique_ptr<Object>> objects) {

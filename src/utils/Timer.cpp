@@ -1,11 +1,10 @@
 #include "Timer.h"
 
-Timer::Timer(const std::string& name)
-    : name(name), start_time(std::chrono::high_resolution_clock::now()) {}
+Timer::Timer(const std::string name)
+    : name(std::move(name)),
+      start_time(std::chrono::high_resolution_clock::now()) {}
 
-Timer::~Timer() {
-    if (!is_stopped) stop();
-}
+Timer::~Timer() { stop(); }
 
 void Timer::stop() {
     if (is_stopped) return;

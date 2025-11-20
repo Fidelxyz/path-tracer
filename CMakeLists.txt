@@ -7,6 +7,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(OpenMP REQUIRED)
 
+add_subdirectory(3rdparty/eigen)
+add_subdirectory(3rdparty/libigl)
+
 # Executable target
 add_executable(
   showcase
@@ -28,9 +31,10 @@ add_executable(
   src/viewing_ray.cpp)
 
 # Make third-party as SYSTEM to suppress warnings from them
-target_include_directories(showcase SYSTEM PRIVATE 3rdparty/include eigen)
+target_include_directories(showcase SYSTEM PRIVATE 3rdparty/include)
 
-target_link_libraries(showcase PRIVATE OpenMP::OpenMP_CXX)
+target_link_libraries(showcase PRIVATE OpenMP::OpenMP_CXX Eigen3::Eigen
+                                       igl::core)
 target_compile_options(showcase PRIVATE ${OPENMP_CXX_FLAGS})
 
 if(MSVC)
