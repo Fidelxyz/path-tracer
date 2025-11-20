@@ -4,8 +4,8 @@
 
 #include "../Ray.h"
 
-Triangle::Triangle(const Eigen::Vector3f v0, const Eigen::Vector3f v1,
-                   const Eigen::Vector3f v2, std::shared_ptr<Material> material)
+Triangle::Triangle(Eigen::Vector3f v0, Eigen::Vector3f v1, Eigen::Vector3f v2,
+                   std::shared_ptr<Material> material)
     : Object(std::move(material),
              AABB(v0.cwiseMin(v1).cwiseMin(v2), v0.cwiseMax(v1).cwiseMax(v2))),
       corners(std::move(v0), std::move(v1), std::move(v2)) {}
@@ -30,7 +30,7 @@ Intersection Triangle::intersect(const Ray& ray) const {
     if (alpha < 0 || beta < 0) return Intersection::NoIntersection();
     if (alpha + beta > 1) return Intersection::NoIntersection();
 
-    return Intersection(this, t);
+    return {this, t};
 }
 
 Eigen::Vector3f Triangle::intersection_normal(

@@ -1,16 +1,19 @@
 #include "Timer.h"
 
-Timer::Timer(const std::string name)
+Timer::Timer(std::string name)
     : name(std::move(name)),
       start_time(std::chrono::high_resolution_clock::now()) {}
 
 Timer::~Timer() { stop(); }
 
 void Timer::stop() {
-    if (is_stopped) return;
+    if (is_stopped) {
+        return;
+    }
     is_stopped = true;
     const auto end_time = std::chrono::high_resolution_clock::now();
     const auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(
         end_time - start_time);
-    printf("[Timer] %s: %.3f ms\n", name.c_str(), duration.count() / 1000000.f);
+    printf("[Timer] %s: %.3f ms\n", name.c_str(),
+           static_cast<float>(duration.count()) / 1e6F);
 }

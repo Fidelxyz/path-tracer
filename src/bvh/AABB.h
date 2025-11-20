@@ -22,9 +22,9 @@ class AABB {
 
     void merge(const AABB& other);
 
-    Eigen::Vector3f center() const;
-    Eigen::Vector3f dimensions() const;
-    bool intersect(const Ray& ray) const;
+    [[nodiscard]] Eigen::Vector3f center() const;
+    [[nodiscard]] Eigen::Vector3f dimensions() const;
+    [[nodiscard]] bool intersect(const Ray& ray) const;
 
     Eigen::Vector3f min_corner;
     Eigen::Vector3f max_corner;

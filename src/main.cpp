@@ -1,5 +1,8 @@
 #include <Eigen/Core>
+#include <cstddef>
 #include <cstdlib>
+#include <iostream>
+#include <limits>
 #include <vector>
 
 #include "ray_color.h"
@@ -11,22 +14,22 @@
 
 int main(int argc, char* argv[]) {
     if (argc != 2) {
-        printf("Usage: %s <scene.json>\n", argv[0]);
+        std::cerr << "Usage: " << argv[0] << " scene.json" << '\n';
         exit(EXIT_FAILURE);
     }
 
     const Scene scene = read_json(argv[1]);
 
-    const unsigned int width = 1280;
-    const unsigned int height = 720;
-    std::vector<unsigned char> image(3 * width * height);
+    const int width = 1280;
+    const int height = 720;
+    std::vector<unsigned char> image(static_cast<size_t>(3 * width * height));
 
     {
         Timer timer("Render");
         ProgressBar progress_bar("Rendering", width * height);
 #pragma omp parallel for collapse(2) schedule(dynamic)
-        for (unsigned int i = 0; i < height; i++) {
-            for (unsigned int j = 0; j < width; j++) {
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
                 // Compute viewing ray
                 const Ray ray = viewing_ray(scene.camera, i, j, width, height);
 
@@ -34,17 +37,20 @@ int main(int argc, char* argv[]) {
                 const Eigen::Vector3f rgb = ray_color(ray, scene);
 
                 // Write color into image
-                const auto clamp = [](const float s) {
-                    return std::max(std::min(s, 1.f), 0.f);
+                const auto image_value =
+                    [](const float value) -> unsigned char {
+                    const float clamped = std::max(std::min(value, 1.F), 0.F);
+                    return static_cast<unsigned char>(
+                        std::numeric_limits<unsigned char>::max() * clamped);
                 };
-                image[3 * (j + width * i) + 0] = 255.f * clamp(rgb(0));
-                image[3 * (j + width * i) + 1] = 255.f * clamp(rgb(1));
-                image[3 * (j + width * i) + 2] = 255.f * clamp(rgb(2));
+                image[(3 * (j + width * i)) + 0] = image_value(rgb(0));
+                image[(3 * (j + width * i)) + 1] = image_value(rgb(1));
+                image[(3 * (j + width * i)) + 2] = image_value(rgb(2));
 
                 progress_bar.update();
             }
         }
     }
 
-    write_ppm("rgb.ppm", image, width, height, RGB);
+    write_ppm("rgb.ppm", image, width, height, Channels::RGB);
 }

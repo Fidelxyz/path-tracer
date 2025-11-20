@@ -10,12 +10,13 @@ class Triangle : public Object {
     Triangle(const Eigen::Vector3f v0, const Eigen::Vector3f v1,
              const Eigen::Vector3f v2, std::shared_ptr<Material> material);
 
-    Intersection intersect(const Ray& ray) const override;
+    [[nodiscard]] Intersection intersect(const Ray& ray) const override;
 
-    Eigen::Vector3f intersection_normal(const Ray& ray, float t) const override;
+    [[nodiscard]] Eigen::Vector3f intersection_normal(const Ray& ray,
+                                                      float t) const override;
 
     // A triangle has three corners
-    const std::tuple<Eigen::Vector3f, Eigen::Vector3f, Eigen::Vector3f> corners;
+    std::tuple<Eigen::Vector3f, Eigen::Vector3f, Eigen::Vector3f> corners;
 };
 
 #endif

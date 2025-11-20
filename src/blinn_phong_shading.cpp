@@ -14,7 +14,7 @@ Eigen::Vector3f blinn_phong_shading(const Ray& ray,
     // Ambient
     Eigen::Vector3f rgb = intersection.object->material->ka;
 
-    for (auto& light : scene.lights) {
+    for (const auto& light : scene.lights) {
         const Ray ray_to_light =
             light->ray_from(shading_pos + SHADOW_RAY_EPSILON * normal);
 
@@ -26,14 +26,14 @@ Eigen::Vector3f blinn_phong_shading(const Ray& ray,
         // Diffuse
         const auto diffuse =
             intersection.object->material->kd.cwiseProduct(light->intensity) *
-            std::max(0.f, normal.dot(ray_to_light.direction));
+            std::max(0.F, normal.dot(ray_to_light.direction));
 
         // Specular
         const auto h =
             (ray_to_light.direction - ray.direction.normalized()).normalized();
         const auto specular =
             intersection.object->material->ks.cwiseProduct(light->intensity) *
-            std::pow(std::max(0.f, normal.dot(h)),
+            std::pow(std::max(0.F, normal.dot(h)),
                      intersection.object->material->phong_exponent);
 
         rgb += diffuse + specular;

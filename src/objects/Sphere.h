@@ -10,12 +10,13 @@ class Sphere : public Object {
     Sphere(Eigen::Vector3f center, float radius,
            std::shared_ptr<Material> material);
 
-    Intersection intersect(const Ray& ray) const override;
+    [[nodiscard]] Intersection intersect(const Ray& ray) const override;
 
-    Eigen::Vector3f intersection_normal(const Ray& ray, float t) const override;
+    [[nodiscard]] Eigen::Vector3f intersection_normal(const Ray& ray,
+                                                      float t) const override;
 
-    const Eigen::Vector3f center;
-    const float radius;
+    Eigen::Vector3f center;
+    float radius;
 };
 
 #endif

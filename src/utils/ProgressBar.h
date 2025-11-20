@@ -7,13 +7,13 @@ class ProgressBar {
    private:
     static const int BAR_LENGTH = 30;
 
-    const std::string name;
-    const int total;
+    std::string name;
+    int total;
     int completed;
     int last_completed_length;
 
    public:
-    ProgressBar(const std::string& name, const int total_count);
+    ProgressBar(std::string name, int total_count);
     void update();
 
    private:

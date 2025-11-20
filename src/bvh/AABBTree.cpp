@@ -18,7 +18,7 @@ AABBTree::AABBTree(std::vector<std::unique_ptr<Object>> objects) {
 
     const float mid = (bounding_box.min_corner(longest_axis) +
                        bounding_box.max_corner(longest_axis)) /
-                      2.;
+                      2;
 
     std::vector<std::unique_ptr<Object>> objs_left;
     std::vector<std::unique_ptr<Object>> objs_right;
@@ -39,10 +39,10 @@ AABBTree::AABBTree(std::vector<std::unique_ptr<Object>> objects) {
                                         const std::unique_ptr<Object>& b) {
             const float a_center = (a->bounding_box.min_corner(longest_axis) +
                                     a->bounding_box.max_corner(longest_axis)) /
-                                   2.f;
+                                   2;
             const float b_center = (b->bounding_box.min_corner(longest_axis) +
                                     b->bounding_box.max_corner(longest_axis)) /
-                                   2.f;
+                                   2;
             return a_center < b_center;
         };
 
@@ -75,5 +75,5 @@ Intersection AABBTree::intersect(const Ray& ray) const {
     const Intersection left_hit = left->intersect(ray);
     const Intersection right_hit = right->intersect(ray);
 
-    return left_hit.earlier(std::move(right_hit));
+    return left_hit.earlier(right_hit);
 }

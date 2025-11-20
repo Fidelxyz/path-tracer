@@ -19,7 +19,7 @@ Scene read_json(const std::string& filename) {
 
     std::ifstream infile(filename);
     if (!infile) {
-        std::cerr << "Error opening file: " << filename << std::endl;
+        std::cerr << "Error opening file: " << filename << '\n';
         exit(EXIT_FAILURE);
     }
 
@@ -27,12 +27,12 @@ Scene read_json(const std::string& filename) {
     infile >> j;
 
     // parse a vector
-    const auto parse_Vector3f = [](const json& j) -> Eigen::Vector3f {
+    const auto parse_Vector3f = [](const json& j) {
         return Eigen::Vector3f(j[0], j[1], j[2]);
     };
 
     // parse camera
-    const auto parse_camera = [&parse_Vector3f](const json& j) -> Camera {
+    const auto parse_camera = [&parse_Vector3f](const json& j) {
         assert(j["type"] == "perspective" &&
                "Only handling perspective cameras");
         const float d = j["focal_length"];
@@ -86,7 +86,8 @@ Scene read_json(const std::string& filename) {
         objects.reserve(j.size());
         for (const json& jobj : j) {
             const std::shared_ptr<Material> material =
-                (jobj.count("material") && materials.count(jobj["material"]))
+                (jobj.contains("material") &&
+                 materials.contains(jobj["material"]))
                     ? materials.at(jobj["material"])
                     : nullptr;
 
@@ -107,7 +108,7 @@ Scene read_json(const std::string& filename) {
                     std::ios::binary);
                 if (!stl_file) {
                     std::cerr << "Error opening STL file: "
-                              << jobj["stl"].get<std::string>() << std::endl;
+                              << jobj["stl"].get<std::string>() << '\n';
                     exit(EXIT_FAILURE);
                 }
 
@@ -126,6 +127,6 @@ Scene read_json(const std::string& filename) {
         return objects;
     };
 
-    return Scene(parse_camera(j["camera"]), parse_objects(j["objects"]),
-                 parse_lights(j["lights"]));
+    return {parse_camera(j["camera"]), parse_objects(j["objects"]),
+            parse_lights(j["lights"])};
 }

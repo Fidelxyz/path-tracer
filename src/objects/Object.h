@@ -15,7 +15,7 @@ class Object {
     Object(std::shared_ptr<Material> material, AABB bounding_box);
 
     // https://stackoverflow.com/questions/461203/when-to-use-virtual-destructors
-    virtual ~Object();
+    virtual ~Object() = default;
 
     /**
      * Intersect object with ray.
@@ -25,7 +25,7 @@ class Object {
      * @param [in] max_t Maximum parametric distance to consider.
      * @return Intersection information.
      */
-    virtual Intersection intersect(const Ray& ray) const = 0;
+    [[nodiscard]] virtual Intersection intersect(const Ray& ray) const = 0;
 
     /**
      * Get normal at a given point on the object's surface.
@@ -35,9 +35,10 @@ class Object {
      *               point.
      * @return Normal vector at the given point.
      */
-    virtual Eigen::Vector3f intersection_normal(const Ray& ray, float t) const;
+    [[nodiscard]] virtual Eigen::Vector3f intersection_normal(const Ray& ray,
+                                                              float t) const;
 
-    const std::shared_ptr<Material> material;
+    std::shared_ptr<Material> material;
     AABB bounding_box;
 };
 

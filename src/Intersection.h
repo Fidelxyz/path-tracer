@@ -2,7 +2,6 @@
 #define INTERSECION_H
 
 #include <limits>
-#include <utility>
 
 class Object;
 
@@ -14,19 +13,18 @@ class Intersection {
     Intersection(const Object* const object, const float t)
         : object(object), t(t) {}
 
-    const Intersection&& earlier(const Intersection&& other) const {
-        return (t < other.t) ? std::forward<const Intersection>(*this)
-                             : std::forward<const Intersection>(other);
+    [[nodiscard]] Intersection earlier(Intersection other) const {
+        return (t < other.t) ? *this : other;
     }
 
-    bool has_intersection() const { return object != nullptr; }
+    [[nodiscard]] bool has_intersection() const { return object != nullptr; }
 
-    static inline Intersection NoIntersection() { return Intersection(); }
+    static Intersection NoIntersection() { return {}; }
 
     // Pointer to the intersected object (nullptr if no intersection)
-    const Object* const object;
+    const Object* object;
     // Parametric distance along the ray to the intersection point
-    const float t;
+    float t;
 };
 
 #endif

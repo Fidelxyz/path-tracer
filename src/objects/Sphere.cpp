@@ -2,8 +2,8 @@
 
 #include "../Ray.h"
 
-Sphere::Sphere(const Eigen::Vector3f center, const float radius,
-               const std::shared_ptr<Material> material)
+Sphere::Sphere(Eigen::Vector3f center, const float radius,
+               std::shared_ptr<Material> material)
     : Object(std::move(material),
              AABB(center - Eigen::Vector3f::Constant(radius),
                   center + Eigen::Vector3f::Constant(radius))),
@@ -11,13 +11,15 @@ Sphere::Sphere(const Eigen::Vector3f center, const float radius,
       radius(radius) {}
 
 Intersection Sphere::intersect(const Ray& ray) const {
-    if (!bounding_box.intersect(ray)) return Intersection::NoIntersection();
+    if (!bounding_box.intersect(ray)) {
+        return Intersection::NoIntersection();
+    }
 
-    const auto calc_t = [this](const Ray& ray) -> std::optional<float> const {
+    const auto calc_t = [this](const Ray& ray) -> std::optional<float> {
         const float a = ray.direction.squaredNorm();
         const float b = 2 * ray.direction.dot(ray.origin - center);
-        const float c = (ray.origin - center).squaredNorm() - radius * radius;
-        const float discriminant = b * b - 4 * a * c;
+        const float c = (ray.origin - center).squaredNorm() - (radius * radius);
+        const float discriminant = (b * b) - (4 * a * c);
 
         if (discriminant < 0) return std::nullopt;
 
@@ -37,7 +39,7 @@ Intersection Sphere::intersect(const Ray& ray) const {
     const std::optional<float> t_opt = calc_t(ray);
     if (!t_opt.has_value()) return Intersection::NoIntersection();
 
-    return Intersection(this, t_opt.value());
+    return {this, t_opt.value()};
 }
 
 Eigen::Vector3f Sphere::intersection_normal(const Ray& ray, float t) const {

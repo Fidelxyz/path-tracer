@@ -15,8 +15,8 @@ class Material {
           phong_exponent(phong_exp) {}
 
     // Ambient, Diffuse, Specular, Mirror Color
-    const Eigen::Vector3f ka, kd, ks, km;
+    Eigen::Vector3f ka, kd, ks, km;
     // Phong exponent
-    const float phong_exponent;
+    float phong_exponent;
 };
 #endif

@@ -5,10 +5,11 @@
 
 const int MAX_REFLECTION = 16;
 
-static Eigen::Vector3f reflect(const Eigen::Vector3f& in,
-                               const Eigen::Vector3f& n) {
+namespace {
+Eigen::Vector3f reflect(const Eigen::Vector3f& in, const Eigen::Vector3f& n) {
     return in - 2 * in.dot(n) * n;
 }
+}  // namespace
 
 Eigen::Vector3f ray_color(const Ray& ray, const Scene& scene) {
     std::function<bool(const Ray&, const int, Eigen::Vector3f&)>
@@ -36,6 +37,8 @@ Eigen::Vector3f ray_color(const Ray& ray, const Scene& scene) {
     };
 
     Eigen::Vector3f rgb;
-    if (!ray_color_recursive(ray, 0, rgb)) return Eigen::Vector3f::Zero();
+    if (!ray_color_recursive(ray, 0, rgb)) {
+        return Eigen::Vector3f::Zero();
+    }
     return rgb;
 }

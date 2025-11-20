@@ -6,13 +6,13 @@
 
 class Timer {
    public:
-    Timer(std::string name);
+    explicit Timer(std::string name);
     ~Timer();
     void stop();
 
    private:
-    const std::string name;
-    const std::chrono::high_resolution_clock::time_point start_time;
+    std::string name;
+    std::chrono::high_resolution_clock::time_point start_time;
     bool is_stopped = false;
 };
 

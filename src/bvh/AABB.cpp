@@ -5,14 +5,14 @@ AABB::AABB()
       max_corner(Eigen::Vector3f::Constant(-Eigen::Infinity)) {}
 
 AABB::AABB(Eigen::Vector3f min_corner, Eigen::Vector3f max_corner)
-    : min_corner(min_corner), max_corner(max_corner) {}
+    : min_corner(std::move(min_corner)), max_corner(std::move(max_corner)) {}
 
 void AABB::merge(const AABB& other) {
     min_corner = min_corner.cwiseMin(other.min_corner);
     max_corner = max_corner.cwiseMax(other.max_corner);
 }
 
-Eigen::Vector3f AABB::center() const { return (min_corner + max_corner) / 2.f; }
+Eigen::Vector3f AABB::center() const { return (min_corner + max_corner) / 2; }
 
 Eigen::Vector3f AABB::dimensions() const { return max_corner - min_corner; }
 

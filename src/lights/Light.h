@@ -7,9 +7,9 @@
 
 class Light {
    public:
-    Light(Eigen::Vector3f intensity);
+    explicit Light(Eigen::Vector3f intensity);
     // https://stackoverflow.com/questions/461203/when-to-use-virtual-destructors
-    virtual ~Light() {};
+    virtual ~Light() = default;
 
     /**
      * Given a query point return a ray _toward_ the Light.
@@ -17,8 +17,8 @@ class Light {
      * @param [in] point 3D query point in space
      * @return Ray from `point` toward the Light
      */
-    virtual Ray ray_from(Eigen::Vector3f point) const = 0;
+    [[nodiscard]] virtual Ray ray_from(Eigen::Vector3f point) const = 0;
 
-    const Eigen::Vector3f intensity;
+    Eigen::Vector3f intensity;
 };
 #endif

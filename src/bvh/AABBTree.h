@@ -18,9 +18,9 @@ class AABBTree : public Object {
      * @param depth The depth of the current node in the tree (default is 0
      * for the root node).
      */
-    AABBTree(std::vector<std::unique_ptr<Object>> objects);
+    explicit AABBTree(std::vector<std::unique_ptr<Object>> objects);
 
-    Intersection intersect(const Ray& ray) const override;
+    [[nodiscard]] Intersection intersect(const Ray& ray) const override;
 
     std::unique_ptr<Object> left;
     std::unique_ptr<Object> right;

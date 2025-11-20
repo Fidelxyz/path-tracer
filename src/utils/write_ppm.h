@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-enum Channels { GRAY, RGB };
+enum Channels : std::uint8_t { GRAY, RGB };
 
 /**
  * Write an rgb or grayscale image to a .ppm file.
