@@ -1,60 +1,50 @@
 #include <Eigen/Core>
-#include <memory>
+#include <cstdlib>
 #include <vector>
 
-#include "Camera.h"
-#include "Light.h"
-#include "Object.h"
-#include "raycolor.h"
+#include "ray_color.h"
 #include "read_json.h"
 #include "utils/ProgressBar.h"
 #include "utils/Timer.h"
+#include "utils/write_ppm.h"
 #include "viewing_ray.h"
-#include "write_ppm.h"
 
 int main(int argc, char* argv[]) {
     if (argc != 2) {
         printf("Usage: %s <scene.json>\n", argv[0]);
+        exit(EXIT_FAILURE);
     }
 
-    Camera camera;
-    std::vector<std::shared_ptr<Object>> objects;
-    std::vector<std::shared_ptr<Light>> lights;
-    read_json(argv[1], camera, objects, lights);
+    const Scene scene = read_json(argv[1]);
 
     const unsigned int width = 1280;
     const unsigned int height = 720;
-    std::vector<unsigned char> rgb_image(3 * width * height);
+    std::vector<unsigned char> image(3 * width * height);
 
     {
         Timer timer("Render");
         ProgressBar progress_bar("Rendering", width * height);
-#pragma omp parallel for collapse(2)
+#pragma omp parallel for collapse(2) schedule(dynamic)
         for (unsigned int i = 0; i < height; i++) {
             for (unsigned int j = 0; j < width; j++) {
-                // Set background color
-                Eigen::Vector3f rgb(0, 0, 0);
-
                 // Compute viewing ray
-                Ray ray;
-                viewing_ray(camera, i, j, width, height, ray);
+                const Ray ray = viewing_ray(scene.camera, i, j, width, height);
 
                 // Shoot ray and collect color
-                raycolor(ray, 1.0, objects, lights, 0, rgb);
+                const Eigen::Vector3f rgb = ray_color(ray, scene);
 
-                // Write double precision color into image
-                auto clamp = [](double s) {
-                    return std::max(std::min(s, 1.), 0.);
+                // Write color into image
+                const auto clamp = [](const float s) {
+                    return std::max(std::min(s, 1.f), 0.f);
                 };
-                rgb_image[0 + 3 * (j + width * i)] = 255. * clamp(rgb(0));
-                rgb_image[1 + 3 * (j + width * i)] = 255. * clamp(rgb(1));
-                rgb_image[2 + 3 * (j + width * i)] = 255. * clamp(rgb(2));
+                image[3 * (j + width * i) + 0] = 255.f * clamp(rgb(0));
+                image[3 * (j + width * i) + 1] = 255.f * clamp(rgb(1));
+                image[3 * (j + width * i) + 2] = 255.f * clamp(rgb(2));
 
-#pragma omp critical
                 progress_bar.update();
             }
         }
     }
 
-    write_ppm("rgb.ppm", rgb_image, width, height, 3);
+    write_ppm("rgb.ppm", image, width, height, RGB);
 }

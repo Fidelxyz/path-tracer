@@ -10,25 +10,28 @@ find_package(OpenMP REQUIRED)
 # Executable target
 add_executable(
   showcase
+  src/bvh/AABB.cpp
+  src/bvh/AABBTree.cpp
+  src/lights/DirectionalLight.cpp
+  src/lights/Light.cpp
+  src/lights/PointLight.cpp
+  src/objects/Object.cpp
+  src/objects/Sphere.cpp
+  src/objects/Triangle.cpp
   src/utils/ProgressBar.cpp
   src/utils/Timer.cpp
-  src/main.cpp
+  src/utils/write_ppm.cpp
   src/blinn_phong_shading.cpp
-  src/DirectionalLight.cpp
-  src/first_hit.cpp
   src/main.cpp
-  src/Plane.cpp
-  src/PointLight.cpp
-  src/raycolor.cpp
+  src/ray_color.cpp
   src/read_json.cpp
-  src/Sphere.cpp
-  src/Triangle.cpp
-  src/TriangleSoup.cpp
-  src/viewing_ray.cpp
-  src/write_ppm.cpp)
+  src/viewing_ray.cpp)
 
 # Make third-party as SYSTEM to suppress warnings from them
 target_include_directories(showcase SYSTEM PRIVATE 3rdparty/include eigen)
+
+target_link_libraries(showcase PRIVATE OpenMP::OpenMP_CXX)
+target_compile_options(showcase PRIVATE ${OPENMP_CXX_FLAGS})
 
 if(MSVC)
   target_compile_options(showcase PRIVATE /W4 /permissive-)

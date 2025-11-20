@@ -3,15 +3,26 @@
 
 #include <Eigen/Core>
 
-struct Camera {
+class Camera {
+   public:
+    Camera(Eigen::Vector3f e, Eigen::Vector3f u, Eigen::Vector3f v,
+           Eigen::Vector3f w, float d, float width, float height)
+        : e(std::move(e)),
+          u(std::move(u)),
+          v(std::move(v)),
+          w(std::move(w)),
+          d(std::move(d)),
+          width(width),
+          height(height) {}
+
     // Origin or "eye"
-    Eigen::Vector3f e;
+    const Eigen::Vector3f e;
     // orthonormal frame so that -w is the viewing direction.
-    Eigen::Vector3f u, v, w;
+    const Eigen::Vector3f u, v, w;
     // image plane distance / focal length
-    double d;
+    const float d;
     // width and height of image plane
-    double width, height;
+    const float width, height;
 };
 
 #endif
