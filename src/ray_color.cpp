@@ -1,7 +1,7 @@
 #include "ray_color.h"
 
 #include "Intersection.h"
-#include "blinn_phong_shading.h"
+#include "shader.h"
 
 const int MAX_REFLECTION = 16;
 
@@ -21,17 +21,18 @@ Eigen::Vector3f ray_color(const Ray& ray, const Scene& scene) {
         if (!intersection.has_intersection()) return false;
 
         const Eigen::Vector3f normal =
-            intersection.object->intersection_normal(ray, intersection.t);
+            intersection.object->normal_at(ray, intersection);
 
-        rgb = blinn_phong_shading(ray, intersection, normal, scene);
+        rgb = shading(ray, intersection, normal, scene);
 
         // Reflection
-        const Ray reflected_ray = {ray.origin + intersection.t * ray.direction,
-                                   reflect(ray.direction, normal)};
-        if (Eigen::Vector3f indirect;
-            ray_color_recursive(reflected_ray, depth + 1, indirect)) {
-            rgb += intersection.object->material->km.cwiseProduct(indirect);
-        }
+        // const Ray reflected_ray = {ray.origin + intersection.t *
+        // ray.direction,
+        //                            reflect(ray.direction, normal)};
+        // if (Eigen::Vector3f indirect;
+        //     ray_color_recursive(reflected_ray, depth + 1, indirect)) {
+        //     rgb += intersection.object->material->km.cwiseProduct(indirect);
+        // }
 
         return true;
     };

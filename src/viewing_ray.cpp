@@ -10,6 +10,6 @@ Ray viewing_ray(const Camera& camera, const int i, const int j, const int width,
           0.5F) *
         camera.height;
     const Eigen::Vector3f direction =
-        camera.u * u + camera.v * v - camera.w * camera.d;
-    return {camera.e, direction};
+        camera.u * u + camera.v * v - camera.w * camera.focal_length;
+    return {camera.pos, direction};
 }

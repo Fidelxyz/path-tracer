@@ -4,7 +4,7 @@
 #include <Eigen/Core>
 #include <memory>
 
-#include "../objects/Object.h"
+#include "../object/Object.h"
 
 class AABBTree : public Object {
    public:

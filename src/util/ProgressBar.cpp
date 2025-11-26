@@ -1,5 +1,7 @@
 #include "ProgressBar.h"
 
+#include <iostream>
+
 ProgressBar::ProgressBar(std::string name, const int total_count)
     : name(std::move(name)),
       total(total_count),
@@ -29,17 +31,17 @@ void ProgressBar::display() {
     {
         last_completed_length = completed_length;
 
-        printf("\r%s [", name.c_str());
+        std::cout << "\r" << name << " [";
         for (int i = 0; i < completed_length; i++) {
-            putchar('=');
+            std::cout << '=';
         }
         for (int i = BAR_LENGTH - completed_length; i > 0; i--) {
-            putchar('-');
+            std::cout << ' ';
         }
-        printf("] %d / %d", completed, total);
+        std::cout << "] " << completed << " / " << total;
         if (completed == total) {
-            putchar('\n');
+            std::cout << "\n";
         }
-        fflush(stdout);
+        std::cout << std::flush;
     }
 }

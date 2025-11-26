@@ -1,5 +1,7 @@
 # CSC317 Showcase
 
+Modified from A3: ray-tracing, but modified almost all files.
+
 ## Performance Improvement
 
 - OpenMP

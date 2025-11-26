@@ -17,7 +17,8 @@ bool write_ppm(const std::string& filename,
         case Channels::GRAY:
             ofs << "P2" << "\n";
             ofs << width << " " << height << "\n";
-            ofs << std::numeric_limits<unsigned char>::max() << "\n";
+            ofs << static_cast<int>(std::numeric_limits<unsigned char>::max())
+                << "\n";
 
             for (int i = 0; i < height; i++) {
                 for (int j = 0; j < width; j++) {
@@ -30,7 +31,8 @@ bool write_ppm(const std::string& filename,
         case Channels::RGB:
             ofs << "P3" << "\n";
             ofs << width << " " << height << "\n";
-            ofs << std::numeric_limits<unsigned char>::max() << "\n";
+            ofs << static_cast<int>(std::numeric_limits<unsigned char>::max())
+                << "\n";
 
             for (int i = 0; i < height; i++) {
                 for (int j = 0; j < width; j++) {

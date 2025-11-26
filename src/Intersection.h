@@ -1,6 +1,7 @@
 #ifndef INTERSECION_H
 #define INTERSECION_H
 
+#include <Eigen/Core>
 #include <limits>
 
 class Object;
@@ -8,10 +9,15 @@ class Object;
 class Intersection {
    public:
     Intersection()
-        : object(nullptr), t(std::numeric_limits<float>::infinity()) {}
+        : object(nullptr),
+          t(std::numeric_limits<float>::infinity()),
+          barycentric_coords(Eigen::Vector3f::Zero()) {}
 
-    Intersection(const Object* const object, const float t)
-        : object(object), t(t) {}
+    Intersection(const Object* const object, const float t,
+                 Eigen::Vector3f barycentric_coords = Eigen::Vector3f::Zero())
+        : object(object),
+          t(t),
+          barycentric_coords(std::move(barycentric_coords)) {}
 
     [[nodiscard]] Intersection earlier(Intersection other) const {
         return (t < other.t) ? *this : other;
@@ -25,6 +31,8 @@ class Intersection {
     const Object* object;
     // Parametric distance along the ray to the intersection point
     float t;
+    // Barycentric coordinates at the intersection point
+    Eigen::Vector3f barycentric_coords;
 };
 
 #endif

@@ -1,3 +1,5 @@
+#include <omp.h>
+
 #include <Eigen/Core>
 #include <cstddef>
 #include <cstdlib>
@@ -7,9 +9,9 @@
 
 #include "ray_color.h"
 #include "read_json.h"
-#include "utils/ProgressBar.h"
-#include "utils/Timer.h"
-#include "utils/write_ppm.h"
+#include "util/ProgressBar.h"
+#include "util/Timer.h"
+#include "util/write_ppm.h"
 #include "viewing_ray.h"
 
 int main(int argc, char* argv[]) {
@@ -20,10 +22,11 @@ int main(int argc, char* argv[]) {
 
     const Scene scene = read_json(argv[1]);
 
-    const int width = 1280;
-    const int height = 720;
+    const int width = 540;
+    const int height = 360;
     std::vector<unsigned char> image(static_cast<size_t>(3 * width * height));
 
+    std::cout << "Rendering in threads: " << omp_get_max_threads() << '\n';
     {
         Timer timer("Render");
         ProgressBar progress_bar("Rendering", width * height);
@@ -34,18 +37,17 @@ int main(int argc, char* argv[]) {
                 const Ray ray = viewing_ray(scene.camera, i, j, width, height);
 
                 // Shoot ray and collect color
-                const Eigen::Vector3f rgb = ray_color(ray, scene);
+                Eigen::Vector3f rgb = ray_color(ray, scene);
+                rgb *= scene.camera.exposure;
+                rgb = rgb.cwiseMax(Eigen::Vector3f::Zero())
+                          .cwiseMin(Eigen::Vector3f::Ones());
 
-                // Write color into image
-                const auto image_value =
-                    [](const float value) -> unsigned char {
-                    const float clamped = std::max(std::min(value, 1.F), 0.F);
-                    return static_cast<unsigned char>(
-                        std::numeric_limits<unsigned char>::max() * clamped);
-                };
-                image[(3 * (j + width * i)) + 0] = image_value(rgb(0));
-                image[(3 * (j + width * i)) + 1] = image_value(rgb(1));
-                image[(3 * (j + width * i)) + 2] = image_value(rgb(2));
+                Eigen::Vector3<unsigned char> pixels =
+                    (std::numeric_limits<unsigned char>::max() * rgb)
+                        .cast<unsigned char>();
+                image[(3 * (j + width * i)) + 0] = pixels(0);
+                image[(3 * (j + width * i)) + 1] = pixels(1);
+                image[(3 * (j + width * i)) + 2] = pixels(2);
 
                 progress_bar.update();
             }

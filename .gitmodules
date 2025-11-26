@@ -5,3 +5,7 @@
 [submodule "libigl"]
 	path = 3rdparty/libigl
 	url = https://github.com/libigl/libigl.git
+
+[submodule "3rdparty/tinyobjloader"]
+	path = 3rdparty/tinyobjloader
+	url = https://github.com/tinyobjloader/tinyobjloader.git

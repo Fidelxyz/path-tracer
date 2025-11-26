@@ -2,11 +2,12 @@
 #define SCENE_H
 
 #include <cassert>
+#include <iostream>
 
 #include "Camera.h"
 #include "bvh/AABBTree.h"
-#include "lights/Light.h"
-#include "objects/Object.h"
+#include "light/Light.h"
+#include "object/Object.h"
 
 using Objects = std::vector<std::unique_ptr<Object>>;
 using Lights = std::vector<std::unique_ptr<Light>>;
