@@ -11,8 +11,10 @@
 #include "read_json.h"
 #include "util/ProgressBar.h"
 #include "util/Timer.h"
-#include "util/write_ppm.h"
 #include "viewing_ray.h"
+
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.h"
 
 int main(int argc, char* argv[]) {
     if (argc != 2) {
@@ -22,8 +24,8 @@ int main(int argc, char* argv[]) {
 
     const Scene scene = read_json(argv[1]);
 
-    const int width = 540;
-    const int height = 360;
+    const int width = static_cast<int>(scene.camera.resolution_x);
+    const int height = static_cast<int>(scene.camera.resolution_y);
     std::vector<unsigned char> image(static_cast<size_t>(3 * width * height));
 
     std::cout << "Rendering in threads: " << omp_get_max_threads() << '\n';
@@ -54,5 +56,5 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    write_ppm("rgb.ppm", image, width, height, Channels::RGB);
+    stbi_write_png("output.png", width, height, 3, image.data(), 3 * width);
 }

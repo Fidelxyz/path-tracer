@@ -1,6 +1,7 @@
 #include "Sphere.h"
 
 #include <numbers>
+#include <optional>
 
 #include "../Ray.h"
 
@@ -26,12 +27,12 @@ Intersection Sphere::intersect(const Ray& ray) const {
         if (discriminant < 0) return std::nullopt;
 
         // smaller t
-        float t = (-b - sqrt(discriminant)) / (2 * a);
+        float t = (-b - std::sqrt(discriminant)) / (2 * a);
         if (t > ray.max_t) return std::nullopt;
         if (t >= ray.min_t) return t;
 
         // larger t
-        t = (-b + sqrt(discriminant)) / (2 * a);
+        t = (-b + std::sqrt(discriminant)) / (2 * a);
         if (t > ray.max_t) return std::nullopt;
         if (t >= ray.min_t) return t;
 

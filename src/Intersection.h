@@ -19,13 +19,13 @@ class Intersection {
           t(t),
           barycentric_coords(std::move(barycentric_coords)) {}
 
-    [[nodiscard]] Intersection earlier(Intersection other) const {
+    [[nodiscard]] const Intersection& earlier(const Intersection& other) const {
         return (t < other.t) ? *this : other;
     }
 
     [[nodiscard]] bool has_intersection() const { return object != nullptr; }
 
-    static Intersection NoIntersection() { return {}; }
+    static const Intersection NoIntersection() { return {}; }
 
     // Pointer to the intersected object (nullptr if no intersection)
     const Object* object;

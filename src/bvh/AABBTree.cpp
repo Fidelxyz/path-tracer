@@ -49,7 +49,8 @@ AABBTree::AABBTree(std::vector<std::unique_ptr<Object>> objects) {
         std::vector<std::unique_ptr<Object>> objs = objs_left.size() != 0
                                                         ? std::move(objs_left)
                                                         : std::move(objs_right);
-        const auto mid_iter = objs.begin() + objs.size() / 2;
+        const auto mid_iter =
+            objs.begin() + static_cast<std::ptrdiff_t>(objs.size() / 2);
         std::nth_element(objs.begin(), mid_iter, objs.end(), compare_center);
 
         objs_left.clear();

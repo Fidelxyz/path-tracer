@@ -17,19 +17,16 @@ Eigen::Vector3f AABB::center() const { return (min_corner + max_corner) / 2; }
 Eigen::Vector3f AABB::dimensions() const { return max_corner - min_corner; }
 
 bool AABB::intersect(const Ray& ray) const {
-    float t_xmin = (min_corner.x() - ray.origin.x()) / ray.direction.x();
-    float t_ymin = (min_corner.y() - ray.origin.y()) / ray.direction.y();
-    float t_zmin = (min_corner.z() - ray.origin.z()) / ray.direction.z();
-    float t_xmax = (max_corner.x() - ray.origin.x()) / ray.direction.x();
-    float t_ymax = (max_corner.y() - ray.origin.y()) / ray.direction.y();
-    float t_zmax = (max_corner.z() - ray.origin.z()) / ray.direction.z();
+    const Eigen::Vector3f t1 =
+        (min_corner - ray.origin).cwiseQuotient(ray.direction);
+    const Eigen::Vector3f t2 =
+        (max_corner - ray.origin).cwiseQuotient(ray.direction);
 
-    if (t_xmin > t_xmax) std::swap(t_xmin, t_xmax);
-    if (t_ymin > t_ymax) std::swap(t_ymin, t_ymax);
-    if (t_zmin > t_zmax) std::swap(t_zmin, t_zmax);
+    const Eigen::Vector3f t_min_vec = t1.cwiseMin(t2);
+    const Eigen::Vector3f t_max_vec = t1.cwiseMax(t2);
 
-    const double t_min = std::max({t_xmin, t_ymin, t_zmin, ray.min_t});
-    const double t_max = std::min({t_xmax, t_ymax, t_zmax, ray.max_t});
+    const float t_min = std::max(t_min_vec.maxCoeff(), ray.min_t);
+    const float t_max = std::min(t_max_vec.minCoeff(), ray.max_t);
 
     return t_min <= t_max;
 }

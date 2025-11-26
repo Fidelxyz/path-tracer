@@ -22,8 +22,8 @@ add_executable(
   src/object/Sphere.cpp
   src/object/Triangle.cpp
   src/util/ProgressBar.cpp
+  src/util/random.cpp
   src/util/Timer.cpp
-  src/util/write_ppm.cpp
   src/main.cpp
   src/ray_color.cpp
   src/read_json.cpp

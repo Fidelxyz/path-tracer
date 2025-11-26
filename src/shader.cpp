@@ -1,10 +1,29 @@
+/*
+ * Disney's Principled BRDF
+ *
+ * References:
+ * https://disneyanimation.com/publications/physically-based-shading-at-disney/
+ * https://cseweb.ucsd.edu/~tzli/cse272/wi2023/homework1.pdf
+ */
+
 #include "shader.h"
 
 #include <Eigen/src/Core/Matrix.h>
 
 #include <numbers>
 
-const float SHADOW_RAY_EPSILON = 1e-5;
+namespace {
+
+static const float SHADOW_RAY_EPSILON = 1e-5;
+
+static float pow2(const float x) { return x * x; }
+
+static float pow5(const float x) {
+    const float x2 = x * x;
+    return x2 * x2 * x;
+}
+
+}  // namespace
 
 Eigen::Vector3f shading(const Ray& ray, const Intersection& intersection,
                         const Eigen::Vector3f& normal, const Scene& scene) {
@@ -43,13 +62,13 @@ Eigen::Vector3f shading(const Ray& ray, const Intersection& intersection,
         // TODO: pow or mutliplication
 
         // Diffuse
-        const float f_d90 = 0.5F + 2.F * roughness * std::pow(cos_theta_d, 2.F);
-        const auto diffuse =
-            diffuse_color / std::numbers::pi_v<float> *
-            (1.F + (f_d90 - 1.F) * std::pow(1.F - cos_theta_l, 5.F)) *
-            (1.F + (f_d90 - 1.F) * std::pow(1.F - cos_theta_v, 5.F));
+        const float f_d90 = 0.5F + 2.F * roughness * pow2(cos_theta_d);
+        const auto diffuse = diffuse_color / std::numbers::pi_v<float> *
+                             (1.F + (f_d90 - 1.F) * pow5(1.F - cos_theta_l)) *
+                             (1.F + (f_d90 - 1.F) * pow5(1.F - cos_theta_v));
 
-        // // Specular
+        // Specular
+        const float alpha = pow2(roughness);
         // const auto specular =
         //     intersection.object->material->ks.cwiseProduct(light->intensity)
         //     * std::pow(std::max(0.F, normal.dot(h)),

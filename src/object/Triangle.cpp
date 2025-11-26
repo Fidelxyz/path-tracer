@@ -43,15 +43,16 @@ Intersection Triangle::intersect(const Ray& ray) const {
     const auto b = ray.origin - x1;  // auto for lazy evaluation
 
     const Eigen::Vector3f x = a.partialPivLu().solve(b);
+
+    const float t = x(2);
+    if (t < ray.min_t || t > ray.max_t) return Intersection::NoIntersection();
+
     const float alpha = x(0);
     const float beta = x(1);
-    const float t = x(2);
-
-    if (t < ray.min_t || t > ray.max_t) return Intersection::NoIntersection();
-    if (alpha < 0 || beta < 0) return Intersection::NoIntersection();
-    if (alpha + beta > 1) return Intersection::NoIntersection();
-
     const float gamma = 1.F - alpha - beta;
+    if (alpha < 0 || beta < 0 || gamma < 0)
+        return Intersection::NoIntersection();
+
     const Eigen::Vector3f barycentric_coords =
         Eigen::Vector3f(gamma, alpha, beta);
 

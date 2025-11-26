@@ -11,11 +11,11 @@ ProgressBar::ProgressBar(std::string name, const int total_count)
 }
 
 void ProgressBar::update() {
-    if (completed >= total) {
-        return;
-    }
-#pragma omp atomic
+    if (completed >= total) return;
+
+#pragma omp atomic update
     completed++;
+
     display();
 }
 
@@ -23,14 +23,13 @@ void ProgressBar::display() {
     const int completed_length = static_cast<int>(
         static_cast<float>(BAR_LENGTH) *
         (static_cast<float>(completed) / static_cast<float>(total)));
-    if (completed_length == last_completed_length) {
-        return;
-    }
+    if (completed_length == last_completed_length) return;
+
+#pragma omp atomic write
+    last_completed_length = completed_length;
 
 #pragma omp critical
     {
-        last_completed_length = completed_length;
-
         std::cout << "\r" << name << " [";
         for (int i = 0; i < completed_length; i++) {
             std::cout << '=';

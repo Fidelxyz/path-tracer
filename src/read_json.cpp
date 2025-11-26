@@ -44,8 +44,12 @@ static Camera parse_camera(const json& j) {
     const Eigen::Vector3f u = v.cross(w);
     const float height = j_cam["height"];
     const float width = j_cam["width"];
+    const unsigned int resolution_x = j_cam["resolution_x"];
+    const unsigned int resolution_y = j_cam["resolution_y"];
     const float exposure = j_cam.value("exposure", 1.F);
-    return {pos, u, v, w, focal_length, width, height, exposure};
+    return {pos,          u,       v,      w,
+            focal_length, width,   height, resolution_x,
+            resolution_y, exposure};
 }
 
 static Lights parse_lights(const json& j) {

@@ -1,14 +1,51 @@
 #include "ray_color.h"
 
+#include <optional>
+
 #include "Intersection.h"
 #include "shader.h"
-
-const int MAX_REFLECTION = 16;
+#include "util/random.h"
 
 namespace {
-Eigen::Vector3f reflect(const Eigen::Vector3f& in, const Eigen::Vector3f& n) {
-    return in - 2 * in.dot(n) * n;
+
+static const int MAX_REFLECTION = 16;
+
+/**
+ * Return a random reflected direction within the hemisphere around the normal.
+ */
+Eigen::Vector3f reflect(const Eigen::Vector3f& n) {
+    const float a = 2 * std::numbers::pi_v<float> * uniform(rng);
+    const float x = 2 * uniform(rng) - 1;
+    const float r = std::sqrt(1 - x * x);
+    Eigen::Vector3f d = {x, r * std::cos(a), r * std::sin(a)};
+    if (d.dot(n) < 0) d = -d;
+    return d;
 }
+
+std::optional<Eigen::Vector3f> path_trace(const Ray& ray, const Scene& scene,
+                                          const int depth) {
+    if (depth >= MAX_REFLECTION) return std::nullopt;
+
+    const Intersection intersection = scene.objects->intersect(ray);
+    if (!intersection.has_intersection()) return std::nullopt;
+
+    const Eigen::Vector3f normal =
+        intersection.object->normal_at(ray, intersection);
+
+    // Reflection
+    const Ray reflected_ray = {ray.origin + intersection.t * ray.direction,
+                               reflect(normal)};
+
+    Eigen::Vector3f brdf = shading(ray, intersection, normal, scene);
+
+    // const auto indirect = path_trace(reflected_ray, scene, depth + 1);
+    // if (indirect) {
+    //     brdf += intersection.object->material->km.cwiseProduct(*indirect);
+    // }
+
+    return brdf;
+}
+
 }  // namespace
 
 Eigen::Vector3f ray_color(const Ray& ray, const Scene& scene) {
