@@ -9,15 +9,10 @@ class Object;
 class Intersection {
    public:
     Intersection()
-        : object(nullptr),
-          t(std::numeric_limits<float>::infinity()),
-          barycentric_coords(Eigen::Vector3f::Zero()) {}
+        : object(nullptr), t(std::numeric_limits<float>::infinity()) {}
 
-    Intersection(const Object* const object, const float t,
-                 Eigen::Vector3f barycentric_coords = Eigen::Vector3f::Zero())
-        : object(object),
-          t(t),
-          barycentric_coords(std::move(barycentric_coords)) {}
+    Intersection(const Object* const object, const float t)
+        : object(object), t(t) {}
 
     [[nodiscard]] const Intersection& earlier(const Intersection& other) const {
         return (t < other.t) ? *this : other;
@@ -31,8 +26,6 @@ class Intersection {
     const Object* object;
     // Parametric distance along the ray to the intersection point
     float t;
-    // Barycentric coordinates at the intersection point
-    Eigen::Vector3f barycentric_coords;
 };
 
 #endif

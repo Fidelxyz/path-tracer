@@ -24,10 +24,11 @@ add_executable(
   src/util/ProgressBar.cpp
   src/util/random.cpp
   src/util/Timer.cpp
+  src/brdf.cpp
   src/main.cpp
-  src/ray_color.cpp
+  src/path_tracing.cpp
   src/read_json.cpp
-  src/shader.cpp
+  src/render.cpp
   src/viewing_ray.cpp)
 
 # Make third-party as SYSTEM to suppress warnings from them

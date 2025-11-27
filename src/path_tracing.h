@@ -13,6 +13,6 @@
  *
  * @return The collected color as an Eigen::Vector3f.
  */
-Eigen::Vector3f ray_color(const Ray& ray, const Scene& scene);
+Eigen::Vector3f sample(const Ray& ray, const Scene& scene);
 
 #endif

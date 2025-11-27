@@ -5,26 +5,22 @@
 #include <memory>
 
 #include "../Intersection.h"
+#include "../LightSource.h"
+#include "../Material.h"
 #include "../Ray.h"
 #include "../bvh/AABB.h"
-#include "../material/Material.h"
 
-class Object {
+class Object : public LightSource {
    public:
     Object() = default;
     Object(std::shared_ptr<Material> material, AABB bounding_box)
         : material(std::move(material)),
           bounding_box(std::move(bounding_box)) {}
 
-    // https://stackoverflow.com/questions/461203/when-to-use-virtual-destructors
-    virtual ~Object() = default;
-
     /**
      * Intersect object with ray.
      *
      * @param [in] ray Ray to intersect with.
-     * @param [in] min_t Minimum parametric distance to consider.
-     * @param [in] max_t Maximum parametric distance to consider.
      * @return Intersection information.
      */
     [[nodiscard]] virtual Intersection intersect(const Ray& ray) const = 0;
@@ -44,17 +40,29 @@ class Object {
     }
 
     /**
-     * Get texture coordinates at a given point on the object's surface.
+     * Generate a ray from a given point towards an arbitrary point on this
+     * object.
      *
-     * @param [in] ray Incoming ray.
-     * @param [in] intersecetion Intersection information.
-     * @return Texture coordinates at the given point.
+     * @param [in] point Point from which the ray is generated.
+     * @return Generated ray.
      */
-    [[nodiscard]] virtual Eigen::Vector2f texcoord_at(
+    [[nodiscard]] Ray ray_from(
+        [[maybe_unused]] Eigen::Vector3f point) const override {
+        throw std::runtime_error("ray_from() not implemented for this object.");
+    }
+
+    /**
+     * Compute the angular size of this object from a given point.
+     *
+     * @param [in] ray Ray from the point of view.
+     * @param [in] distance Distance from the point of view to the object.
+     * @return Angular size in radians.
+     */
+    [[nodiscard]] float angular_size_from(
         [[maybe_unused]] const Ray& ray,
-        [[maybe_unused]] const Intersection& intersecetion) const {
+        [[maybe_unused]] const float distance) const override {
         throw std::runtime_error(
-            "texcoord_at() not implemented for this object.");
+            "angular_size_from() not implemented for this object.");
     }
 
     std::shared_ptr<Material> material;

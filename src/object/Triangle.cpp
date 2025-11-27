@@ -1,14 +1,14 @@
 #include "Triangle.h"
 
 #include <Eigen/Dense>
+#include <random>
 
 #include "../Ray.h"
-#include "../barycentric_interpolation.h"
+#include "../light/Light.h"
+#include "../util/random.h"
 
 Triangle::Triangle(
     std::tuple<Eigen::Vector3f, Eigen::Vector3f, Eigen::Vector3f> corners,
-    std::tuple<Eigen::Vector3f, Eigen::Vector3f, Eigen::Vector3f> normals,
-    std::tuple<Eigen::Vector2f, Eigen::Vector2f, Eigen::Vector2f> texcoords,
     std::shared_ptr<Material> material)
     : Object(std::move(material), AABB(get<0>(corners)
                                            .cwiseMin(get<1>(corners))
@@ -16,19 +16,12 @@ Triangle::Triangle(
                                        get<0>(corners)
                                            .cwiseMax(get<1>(corners))
                                            .cwiseMax(get<2>(corners)))),
-      corners(std::move(corners)),
-      normals(std::move(normals)),
-      texcoords(std::move(texcoords)) {}
-
-Triangle::Triangle(
-    std::tuple<Eigen::Vector3f, Eigen::Vector3f, Eigen::Vector3f> corners,
-    std::shared_ptr<Material> material)
-    : Triangle(std::move(corners), {}, {}, std::move(material)) {
-    const auto normal =
-        ((std::get<1>(this->corners) - std::get<0>(this->corners))
-             .cross(std::get<2>(this->corners) - std::get<0>(this->corners)))
-            .normalized();
-    this->normals = std::make_tuple(normal, normal, normal);
+      corners(std::move(corners)) {
+    const auto t1 = std::get<1>(this->corners) - std::get<0>(this->corners);
+    const auto t2 = std::get<2>(this->corners) - std::get<0>(this->corners);
+    const Eigen::Vector3f cross_product = t1.cross(t2);
+    normal = cross_product.normalized();
+    area = cross_product.norm() / 2;
 }
 
 Intersection Triangle::intersect(const Ray& ray) const {
@@ -53,19 +46,40 @@ Intersection Triangle::intersect(const Ray& ray) const {
     if (alpha < 0 || beta < 0 || gamma < 0)
         return Intersection::NoIntersection();
 
-    const Eigen::Vector3f barycentric_coords =
-        Eigen::Vector3f(gamma, alpha, beta);
-
-    return {this, t, barycentric_coords};
+    return {this, t};
 }
 
-Eigen::Vector3f Triangle::normal_at([[maybe_unused]] const Ray& ray,
-                                    const Intersection& intersection) const {
-    return barycentric_interpolation(normals, intersection.barycentric_coords);
+Eigen::Vector3f Triangle::normal_at(
+    const Ray& ray, [[maybe_unused]] const Intersection& intersection) const {
+    return ray.direction.dot(normal) < 0 ? normal : -normal;
 }
 
-Eigen::Vector2f Triangle::texcoord_at([[maybe_unused]] const Ray& ray,
-                                      const Intersection& intersection) const {
-    return barycentric_interpolation(texcoords,
-                                     intersection.barycentric_coords);
+Ray Triangle::ray_from(Eigen::Vector3f point) const {
+    // Sample a random point on the triangle surface using barycentric
+    // coordinates.
+    std::uniform_real_distribution<float> uniform_dist(0.F, 1.F);
+    float alpha = uniform_dist(rng);
+    float beta = uniform_dist(rng);
+
+    // Reflect the mirrored triangle region onto the original triangle.
+    if (alpha + beta > 1.0F) {
+        alpha = 1.0F - alpha;
+        beta = 1.0F - beta;
+    }
+
+    const float gamma = 1.0F - alpha - beta;
+
+    const auto target_point = alpha * std::get<0>(corners) +
+                              beta * std::get<1>(corners) +
+                              gamma * std::get<2>(corners);
+    const Eigen::Vector3f diff = target_point - point;
+    const Eigen::Vector3f direction = diff.normalized();
+    const float max_t = diff.norm();
+    return {std::move(point), direction, SHADOW_RAY_EPSILON,
+            max_t - SHADOW_RAY_EPSILON};
+}
+
+float Triangle::angular_size_from(const Ray& ray, const float distance) const {
+    const auto cos_theta = normal.dot(-ray.direction);
+    return area * cos_theta / (distance * distance);
 }

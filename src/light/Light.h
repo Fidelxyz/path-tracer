@@ -3,22 +3,21 @@
 
 #include <Eigen/Core>
 
-#include "../Ray.h"
+#include "../LightSource.h"
 
-class Light {
+const float SHADOW_RAY_EPSILON = 1e-5;
+
+class Light : public LightSource {
    public:
     explicit Light(Eigen::Vector3f intensity);
-    // https://stackoverflow.com/questions/461203/when-to-use-virtual-destructors
-    virtual ~Light() = default;
+    Light(const Light&) = default;
+    Light(Light&&) = delete;
+    Light& operator=(const Light&) = default;
+    Light& operator=(Light&&) = delete;
+    ~Light() override = default;
 
-    /**
-     * Given a query point return a ray _toward_ the Light.
-     *
-     * @param [in] point 3D query point in space
-     * @return Ray from `point` toward the Light
-     */
-    [[nodiscard]] virtual Ray ray_from(Eigen::Vector3f point) const = 0;
+    [[nodiscard]] const Eigen::Vector3f& intensity() const override;
 
-    Eigen::Vector3f intensity;
+    Eigen::Vector3f intensity_;
 };
 #endif

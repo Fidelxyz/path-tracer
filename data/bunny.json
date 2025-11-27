@@ -19,47 +19,52 @@
     ],
     "height": 1,
     "width": 1.7777777778,
-    "exposure": 0.8
+    "resolution_x": 1280,
+    "resolution_y": 720,
+    "samples": 64
   },
   "lights": [
     {
       "type": "point",
       "color": [
-        0.3,
-        0.3,
-        0.3
+        1,
+        1,
+        1
       ],
       "position": [
         -1.5,
         2,
         2
-      ]
+      ],
+      "radius": 0.1
     },
     {
       "type": "point",
       "color": [
-        0.3,
-        0.3,
-        0.3
+        1,
+        1,
+        1
       ],
       "position": [
         2,
         2,
         2
-      ]
+      ],
+      "radius": 0.1
     },
     {
       "type": "point",
       "color": [
-        0.3,
-        0.3,
-        0.3
+        1,
+        1,
+        1
       ],
       "position": [
         0,
         -1,
         1.5
-      ]
+      ],
+      "radius": 0.1
     }
   ],
   "materials": [

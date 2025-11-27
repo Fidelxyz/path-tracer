@@ -10,6 +10,9 @@ class DirectionalLight : public Light {
 
     [[nodiscard]] Ray ray_from(Eigen::Vector3f point) const override;
 
+    [[nodiscard]] float angular_size_from(const Ray& ray,
+                                          float distance) const override;
+
     // Direction _from_ light toward scene.
     Eigen::Vector3f direction;
 };

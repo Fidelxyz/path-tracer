@@ -13,7 +13,6 @@
 
 #include "light/DirectionalLight.h"
 #include "light/PointLight.h"
-#include "material/Color.h"
 #include "object/Sphere.h"
 #include "object/Triangle.h"
 
@@ -46,10 +45,11 @@ static Camera parse_camera(const json& j) {
     const float width = j_cam["width"];
     const unsigned int resolution_x = j_cam["resolution_x"];
     const unsigned int resolution_y = j_cam["resolution_y"];
+    const unsigned int samples = j_cam["samples"];
     const float exposure = j_cam.value("exposure", 1.F);
-    return {pos,          u,       v,      w,
-            focal_length, width,   height, resolution_x,
-            resolution_y, exposure};
+    return {pos,          u,       v,       w,
+            focal_length, width,   height,  resolution_x,
+            resolution_y, samples, exposure};
 }
 
 static Lights parse_lights(const json& j) {
@@ -64,9 +64,9 @@ static Lights parse_lights(const json& j) {
                 to_vector3f(j_light["color"]),
                 to_vector3f(j_light["direction"]).normalized()));
         } else if (j_light["type"] == "point") {
-            lights.emplace_back(
-                std::make_unique<PointLight>(to_vector3f(j_light["color"]),
-                                             to_vector3f(j_light["position"])));
+            lights.emplace_back(std::make_unique<PointLight>(
+                to_vector3f(j_light["color"]), to_vector3f(j_light["position"]),
+                j_light["radius"]));
         }
     }
     lights.shrink_to_fit();
@@ -100,21 +100,10 @@ parse_materials(const json& j) {
                                   : Eigen::Vector3f::Zero();
         const float shininess = jmat.value("shininess", 0.F);
         const float ior = jmat.value("ior", 1.F);
-        const float roughness = jmat.value("roughness", 0.F);
-        const float metallic = jmat.value("metallic", 0.F);
-        const float sheen = jmat.value("sheen", 0.F);
 
-        materials[name] = std::make_shared<Material>(
-            std::make_unique<ColorRGB>(ambient),
-            std::make_unique<ColorRGB>(diffuse),
-            std::make_unique<ColorRGB>(specular),
-            std::make_unique<ColorRGB>(transmittance),
-            std::make_unique<ColorRGB>(emission),
-            std::make_unique<ColorGray>(shininess),
-            std::make_unique<ColorGray>(ior),
-            std::make_unique<ColorGray>(roughness),
-            std::make_unique<ColorGray>(metallic),
-            std::make_unique<ColorGray>(sheen));
+        materials[name] =
+            std::make_shared<Material>(ambient, diffuse, specular,
+                                       transmittance, emission, shininess, ior);
     }
     return materials;
 }
@@ -173,16 +162,9 @@ static std::vector<std::unique_ptr<Object>> read_obj(
     materials.reserve(tinyobj_materials.size());
     for (auto& material : tinyobj_materials) {
         materials.emplace_back(std::make_shared<Material>(
-            std::make_unique<ColorRGB>(to_vector3f(material.ambient)),
-            std::make_unique<ColorRGB>(to_vector3f(material.diffuse)),
-            std::make_unique<ColorRGB>(to_vector3f(material.specular)),
-            std::make_unique<ColorRGB>(to_vector3f(material.transmittance)),
-            std::make_unique<ColorRGB>(to_vector3f(material.emission)),
-            std::make_unique<ColorGray>(material.shininess),
-            std::make_unique<ColorGray>(material.ior),
-            std::make_unique<ColorGray>(material.roughness),
-            std::make_unique<ColorGray>(material.metallic),
-            std::make_unique<ColorGray>(material.sheen)));
+            to_vector3f(material.ambient), to_vector3f(material.diffuse),
+            to_vector3f(material.specular), to_vector3f(material.transmittance),
+            to_vector3f(material.emission), material.shininess, material.ior));
     }
 
     std::vector<std::unique_ptr<Object>> objects;
@@ -197,8 +179,6 @@ static std::vector<std::unique_ptr<Object>> read_obj(
             assert(fv == 3);
 
             std::array<Eigen::Vector3f, 3> vertices = {};
-            std::array<Eigen::Vector3f, 3> normals = {};
-            std::array<Eigen::Vector2f, 3> texcoords = {};
 
             // Loop over vertices in the face.
             for (size_t v = 0; v < fv; v++) {
@@ -210,33 +190,12 @@ static std::vector<std::unique_ptr<Object>> read_obj(
                     tinyobj_attrib.vertices[3 * idx.vertex_index + 0],
                     tinyobj_attrib.vertices[3 * idx.vertex_index + 1],
                     tinyobj_attrib.vertices[3 * idx.vertex_index + 2]);
-
-                // Check if `normal_index` is zero or positive.
-                // negative = no normal data
-                if (idx.normal_index >= 0) {
-                    normals.at(v) = Eigen::Vector3f(
-                        tinyobj_attrib.normals[3 * idx.normal_index + 0],
-                        tinyobj_attrib.normals[3 * idx.normal_index + 1],
-                        tinyobj_attrib.normals[3 * idx.normal_index + 2]);
-                }
-
-                // Check if `texcoord_index` is zero or positive.
-                // negative = no texcoord data
-                if (idx.texcoord_index >= 0) {
-                    texcoords.at(v) = Eigen::Vector2f(
-                        tinyobj_attrib.texcoords[2 * idx.texcoord_index + 0],
-                        tinyobj_attrib.texcoords[2 * idx.texcoord_index + 1]);
-                }
             }
 
-            // per-face material
-            // shape.mesh.material_ids[f];
             const auto& material = materials[shape.mesh.material_ids[f]];
 
             objects.emplace_back(std::make_unique<Triangle>(
                 std::make_tuple(vertices[0], vertices[1], vertices[2]),
-                std::make_tuple(normals[0], normals[1], normals[2]),
-                std::make_tuple(texcoords[0], texcoords[1], texcoords[2]),
                 material));
 
             index_offset += fv;
@@ -311,9 +270,6 @@ Scene read_json(const std::string& filename) {
     auto objects = parse_objects(j, materials, base_path);
     auto lights = parse_lights(j);
     auto camera = parse_camera(j);
-
-    std::cout << "Objects: " << objects.size() << '\n';
-    std::cout << "Lights: " << lights.size() << '\n';
 
     return {std::move(camera), std::move(objects), std::move(lights)};
 }

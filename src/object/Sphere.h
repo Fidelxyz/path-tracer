@@ -15,9 +15,6 @@ class Sphere : public Object {
     [[nodiscard]] Eigen::Vector3f normal_at(
         const Ray& ray, const Intersection& intersection) const override;
 
-    [[nodiscard]] Eigen::Vector2f texcoord_at(
-        const Ray& ray, const Intersection& intersection) const override;
-
     Eigen::Vector3f center;
     float radius;
 };

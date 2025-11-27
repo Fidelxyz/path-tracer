@@ -8,7 +8,8 @@ class Camera {
     Camera(Eigen::Vector3f pos, Eigen::Vector3f u, Eigen::Vector3f v,
            Eigen::Vector3f w, const float focal_length, const float width,
            const float height, unsigned int resolution_x,
-           unsigned int resolution_y, const float exposure)
+           unsigned int resolution_y, unsigned int samples,
+           const float exposure)
         : pos(std::move(pos)),
           u(std::move(u)),
           v(std::move(v)),
@@ -18,6 +19,7 @@ class Camera {
           height(height),
           resolution_x(resolution_x),
           resolution_y(resolution_y),
+          samples(samples),
           exposure(exposure) {}
 
     // Camera position.
@@ -28,8 +30,11 @@ class Camera {
     float focal_length;
     // Width and height of image plane.
     float width, height;
+
     // Resolution of image plane.
     unsigned int resolution_x, resolution_y;
+    // Number of samples per pixel.
+    unsigned int samples;
     // Exposure.
     float exposure;
 };
