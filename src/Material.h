@@ -23,6 +23,7 @@ class Material {
     Eigen::Vector3f emission;
     float shininess;
     float ior;
+    int illum;
 };
 
 #endif

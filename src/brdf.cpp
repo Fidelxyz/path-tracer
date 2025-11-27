@@ -1,3 +1,10 @@
+/**
+ * Cook-Torrance BRDF.
+ *
+ * Reference:
+ * https://learnopengl.com/PBR/Theory
+ */
+
 #include "brdf.h"
 
 #include <Eigen/src/Core/Matrix.h>
@@ -9,17 +16,8 @@ Eigen::Vector3f brdf(const Ray& view_to_surface, const Ray& ray_to_light,
                      const Eigen::Vector3f& normal) {
     const auto& material = view_intersection.object->material;
 
-    // Diffuse
-    const auto diffuse =
-        material->diffuse * std::max(0.F, normal.dot(ray_to_light.direction));
+    // Lambertian diffuse
+    const auto diffuse = material->diffuse / std::numbers::pi_v<float>;
 
-    // Specular
-    const auto h =
-        (ray_to_light.direction - view_to_surface.direction.normalized())
-            .normalized();
-    const auto specular =
-        material->specular *
-        std::pow(std::max(0.F, normal.dot(h)), material->shininess);
-
-    return diffuse + specular;
+    return diffuse;
 }

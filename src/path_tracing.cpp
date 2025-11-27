@@ -20,9 +20,9 @@ namespace {
 static const int MAX_BOUNCES = 16;
 
 /**
- * Return a random reflected direction within the hemisphere around the normal.
+ * Return a random scattered direction within the hemisphere around the normal.
  */
-static Eigen::Vector3f reflect(const Eigen::Vector3f& n) {
+static Eigen::Vector3f scatter(const Eigen::Vector3f& n) {
     std::uniform_real_distribution<float> uniform_dist(0.F, 1.F);
     const float a = 2 * std::numbers::pi_v<float> * uniform_dist(rng);
     const float x = 2 * uniform_dist(rng) - 1;
@@ -39,6 +39,7 @@ static Eigen::Vector3f path_trace(const Ray& ray, const Scene& scene,
     const Intersection intersection = scene.objects->intersect(ray);
     if (!intersection.has_intersection()) return Eigen::Vector3f::Zero();
 
+    const auto& material = intersection.object->material;
     const Eigen::Vector3f normal =
         intersection.object->normal_at(ray, intersection);
     const Eigen::Vector3f surface_point =
@@ -74,7 +75,7 @@ static Eigen::Vector3f path_trace(const Ray& ray, const Scene& scene,
 
     // Contribution from indirect lighting
     const auto sample_indirect = [&]() -> Eigen::Vector3f {
-        const Ray reflected_ray = {surface_point, reflect(normal),
+        const Ray reflected_ray = {surface_point, scatter(normal),
                                    SHADOW_RAY_EPSILON};
 
         // Check for occlusion
@@ -94,7 +95,7 @@ static Eigen::Vector3f path_trace(const Ray& ray, const Scene& scene,
     };
 
     // Emission from the surface itself
-    const Eigen::Vector3f& emission = intersection.object->material->emission;
+    const Eigen::Vector3f& emission = material->emission;
 
     return emission + sample_direct() + sample_indirect();
 }

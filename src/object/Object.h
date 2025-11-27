@@ -29,12 +29,12 @@ class Object : public LightSource {
      * Get normal at a given point on the object's surface.
      *
      * @param [in] ray Incoming ray.
-     * @param [in] intersecetion Intersection information.
+     * @param [in] intersection Intersection information.
      * @return Normal vector at the given point.
      */
     [[nodiscard]] virtual Eigen::Vector3f normal_at(
         [[maybe_unused]] const Ray& ray,
-        [[maybe_unused]] const Intersection& intersecetion) const {
+        [[maybe_unused]] const Intersection& intersection) const {
         throw std::runtime_error(
             "normal_at() not implemented for this object.");
     }

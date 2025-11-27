@@ -11,7 +11,7 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
 
-static const float GAMMA = 1.F;
+static const float GAMMA = 2.2F;
 
 int main(int argc, char* argv[]) {
     if (argc != 2) {
