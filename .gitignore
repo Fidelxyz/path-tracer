@@ -36,3 +36,5 @@
 
 build/*
 .envrc
+
+!data/**/*.obj
