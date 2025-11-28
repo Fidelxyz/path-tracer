@@ -36,20 +36,17 @@ static Camera parse_camera(const json& j) {
     assert(j_cam["type"] == "perspective" &&
            "Only handling perspective cameras");
 
+    const Eigen::Vector3f position = to_vector3f(j_cam["position"]);
+    const Eigen::Vector3f rotation = to_vector3f(j_cam["rotation"]);
     const float focal_length = j_cam["focal_length"];
-    const Eigen::Vector3f pos = to_vector3f(j_cam["eye"]);
-    const Eigen::Vector3f v = to_vector3f(j_cam["up"]).normalized();
-    const Eigen::Vector3f w = -to_vector3f(j_cam["look"]).normalized();
-    const Eigen::Vector3f u = v.cross(w);
     const float height = j_cam["height"];
     const float width = j_cam["width"];
     const unsigned int resolution_x = j_cam["resolution_x"];
     const unsigned int resolution_y = j_cam["resolution_y"];
     const unsigned int samples = j_cam["samples"];
     const float exposure = j_cam.value("exposure", 1.F);
-    return {pos,          u,       v,       w,
-            focal_length, width,   height,  resolution_x,
-            resolution_y, samples, exposure};
+    return {position,     rotation,     focal_length, width,   height,
+            resolution_x, resolution_y, samples,      exposure};
 }
 
 static Lights parse_lights(const json& j) {
@@ -59,14 +56,20 @@ static Lights parse_lights(const json& j) {
     std::vector<std::unique_ptr<Light>> lights;
     lights.reserve(j_lights.size());
     for (const json& j_light : j_lights) {
+        const auto intensity =
+            j_light["intensity"] * to_vector3f(j_light["color"]);
+
         if (j_light["type"] == "directional") {
             lights.emplace_back(std::make_unique<DirectionalLight>(
-                to_vector3f(j_light["color"]),
-                to_vector3f(j_light["direction"]).normalized()));
+                intensity, to_vector3f(j_light["direction"]).normalized()));
+
         } else if (j_light["type"] == "point") {
             lights.emplace_back(std::make_unique<PointLight>(
-                to_vector3f(j_light["color"]), to_vector3f(j_light["position"]),
+                intensity, to_vector3f(j_light["position"]),
                 j_light["radius"]));
+
+        } else {
+            std::cout << "Unknown light type: " << j_light["type"] << "\n";
         }
     }
     lights.shrink_to_fit();
@@ -162,9 +165,20 @@ static std::vector<std::unique_ptr<Object>> read_obj(
     materials.reserve(tinyobj_materials.size());
     for (auto& material : tinyobj_materials) {
         materials.emplace_back(std::make_shared<Material>(
-            to_vector3f(material.ambient), to_vector3f(material.diffuse),
-            to_vector3f(material.specular), to_vector3f(material.transmittance),
-            to_vector3f(material.emission), material.shininess, material.ior));
+            Material{.ambient = to_vector3f(material.ambient),
+                     .diffuse = to_vector3f(material.diffuse),
+                     .specular = to_vector3f(material.specular),
+                     .transmittance = to_vector3f(material.transmittance),
+                     .emission = to_vector3f(material.emission),
+                     .shininess = material.shininess,
+                     .ior = material.ior,
+                     .roughness = material.roughness,
+                     .metallic = material.metallic,
+                     .sheen = material.sheen,
+                     .clearcoat_thickness = material.clearcoat_thickness,
+                     .clearcoat_roughness = material.clearcoat_roughness,
+                     .anisotropy = material.anisotropy,
+                     .anisotropy_rotation = material.anisotropy_rotation}));
     }
 
     std::vector<std::unique_ptr<Object>> objects;

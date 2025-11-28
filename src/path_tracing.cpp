@@ -17,7 +17,8 @@
 
 namespace {
 
-static const int MAX_BOUNCES = 16;
+static const float PROBABILITY_SAMPLE_INDIRECT = 0.1F;
+static const int MAX_BOUNCES = 128;
 
 /**
  * Return a random scattered direction within the hemisphere around the normal.
@@ -97,7 +98,15 @@ static Eigen::Vector3f path_trace(const Ray& ray, const Scene& scene,
     // Emission from the surface itself
     const Eigen::Vector3f& emission = material->emission;
 
-    return emission + sample_direct() + sample_indirect();
+    Eigen::Vector3f color = emission + sample_direct();
+
+    // Russian roulette for indirect lighting
+    std::uniform_real_distribution<float> uniform_dist(0.F, 1.F);
+    if (uniform_dist(rng) < PROBABILITY_SAMPLE_INDIRECT) {
+        color += sample_indirect() / PROBABILITY_SAMPLE_INDIRECT;
+    }
+
+    return color;
 }
 
 }  // namespace

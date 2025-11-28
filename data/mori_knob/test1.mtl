@@ -1,0 +1,28 @@
+#
+#
+#
+
+newmtl BackGroundMat
+Kd 0.6000 .6000 0.6000 
+Pr 1.0000
+Pm 0.0000
+
+newmtl InnerMat
+Kd 0.200 .2000 0.2000
+Pr 0.0000
+Pm 1.0000
+
+newmtl LTELogo
+Kd 0.2500 .25000 0.25000
+Pr 0.0000
+Pm 1.0000
+
+newmtl Material
+Kd 1 1 1
+Pr 1.0000
+Pm 0.0000
+
+newmtl OuterMat
+Kd 0.1000 .0400 0.0100
+Pr 0.3000
+Pm 0.0000

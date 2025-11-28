@@ -1,0 +1,44 @@
+{
+    "camera": {
+        "type": "perspective",
+        "focal_length": 2.5,
+        "position": [
+            -3.5,
+            2.8,
+            -3.5
+        ],
+        "rotation": [
+            -30,
+            -135,
+            0
+        ],
+        "height": 1,
+        "width": 1,
+        "resolution_x": 800,
+        "resolution_y": 800,
+        "samples": 1
+    },
+    "lights": [
+        {
+            "type": "point",
+            "position": [
+                1.0,
+                1.5,
+                -1.0
+            ],
+            "color": [
+                1,
+                1,
+                1
+            ],
+            "intensity": 10,
+            "radius": 0.1
+        }
+    ],
+    "objects": [
+        {
+            "type": "obj",
+            "obj": "mori_knob/testObj.obj"
+        }
+    ]
+}

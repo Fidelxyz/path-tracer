@@ -2,20 +2,15 @@
     "camera": {
         "type": "perspective",
         "focal_length": 0.035,
-        "eye": [
+        "position": [
             -0.008,
             1,
             3.9
         ],
-        "up": [
+        "rotation": [
             0,
-            1,
+            0,
             0
-        ],
-        "look": [
-            0,
-            0,
-            -1
         ],
         "height": 0.025,
         "width": 0.025,

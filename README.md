@@ -17,3 +17,7 @@ Modified from A3: ray-tracing, but modified almost all files.
 - PBR
 - DOF
 - Anti-alising
+
+## References
+
+Models downloaded from Morgan McGuire's [Computer Graphics Archive](https://casual-effects.com/data)
