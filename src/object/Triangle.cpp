@@ -80,6 +80,6 @@ Ray Triangle::ray_from(Eigen::Vector3f point) const {
 }
 
 float Triangle::angular_size_from(const Ray& ray, const float distance) const {
-    const auto cos_theta = normal.dot(-ray.direction);
+    const auto cos_theta = std::abs(normal.dot(ray.direction));
     return area * cos_theta / (distance * distance);
 }

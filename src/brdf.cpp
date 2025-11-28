@@ -14,7 +14,8 @@
 
 namespace {
 
-static constexpr float PI = std::numbers::pi_v<float>;
+static const float PI = std::numbers::pi_v<float>;
+static const float EPSILON = 1e-6F;
 
 template <typename T>
 static T mix(const T& x, const T& y, const float a) {
@@ -35,10 +36,6 @@ Eigen::Vector3f brdf(const Ray& view_to_surface, const Ray& surface_to_light,
                      const Eigen::Vector3f& normal) {
     const auto& material = view_intersection.object->material;
 
-    // Lambertian diffuse
-    const auto diffuse = material->diffuse / std::numbers::pi_v<float>;
-
-    // Cook-Torrance specular
     const Eigen::Vector3f h =
         (-view_to_surface.direction + surface_to_light.direction).normalized();
     const float n_dot_h = normal.dot(h);
@@ -46,9 +43,15 @@ Eigen::Vector3f brdf(const Ray& view_to_surface, const Ray& surface_to_light,
     const float n_dot_v = normal.dot(-view_to_surface.direction);
     const float h_dot_v = h.dot(-view_to_surface.direction);
 
+    // Lambertian diffuse
+    const auto diffuse = material->diffuse / PI;
+
+    // Cook-Torrance specular
+
     // Normal Distribution Function (Trowbridge-Reitz GGX)
     const float a2 = pow2(material->roughness);
-    const float specular_d = a2 / (PI * pow2(pow2(n_dot_h) * (a2 - 1) + 1));
+    const float specular_d =
+        a2 / (PI * pow2(pow2(n_dot_h) * (a2 - 1) + 1) + EPSILON);
 
     // Geometry Function (Smith's method with Schlick-GGX)
     const float k = pow2(material->roughness + 1) / 8;

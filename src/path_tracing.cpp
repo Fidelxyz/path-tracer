@@ -17,7 +17,7 @@
 
 namespace {
 
-static const float PROBABILITY_SAMPLE_INDIRECT = 0.1F;
+static const float PROBABILITY_SAMPLE_INDIRECT = 0.5F;
 static const int MAX_BOUNCES = 128;
 
 /**
@@ -60,13 +60,15 @@ static Eigen::Vector3f path_trace(const Ray& ray, const Scene& scene,
 
         const Ray ray_to_light = light->ray_from(surface_point);
 
+        const float cos_theta = normal.dot(ray_to_light.direction);
+        if (cos_theta <= 0.F) return Eigen::Vector3f::Zero();
+
         // Check for occlusion
         const Intersection ray_to_light_intersection =
             scene.objects->intersect(ray_to_light);
         if (ray_to_light_intersection.has_intersection())
             return Eigen::Vector3f::Zero();
 
-        const float cos_theta = normal.dot(ray_to_light.direction);
         const float p =
             1.F / light->angular_size_from(ray_to_light, ray_to_light.max_t);
         const auto brdf_value = brdf(ray, ray_to_light, intersection, normal);
@@ -79,13 +81,15 @@ static Eigen::Vector3f path_trace(const Ray& ray, const Scene& scene,
         const Ray reflected_ray = {surface_point, scatter(normal),
                                    SHADOW_RAY_EPSILON};
 
+        const float cos_theta = normal.dot(reflected_ray.direction);
+        if (cos_theta <= 0.F) return Eigen::Vector3f::Zero();
+
         // Check for occlusion
         const Intersection reflected_ray_intersection =
             scene.objects->intersect(reflected_ray);
         if (!reflected_ray_intersection.has_intersection())
             return Eigen::Vector3f::Zero();
 
-        const float cos_theta = normal.dot(reflected_ray.direction);
         // PDF for uniform hemisphere sampling
         const float p = 1.F / (2.F * std::numbers::pi_v<float>);
         const auto brdf_value = brdf(ray, reflected_ray, intersection, normal);

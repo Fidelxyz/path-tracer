@@ -16,7 +16,7 @@
         "width": 0.025,
         "resolution_x": 800,
         "resolution_y": 800,
-        "samples": 64
+        "samples": 512
     },
     "objects": [
         {
