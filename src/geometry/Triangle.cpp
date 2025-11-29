@@ -4,18 +4,18 @@
 #include <random>
 
 #include "../Ray.h"
-#include "../light/Light.h"
 #include "../util/random.h"
 
 Triangle::Triangle(
     std::tuple<Eigen::Vector3f, Eigen::Vector3f, Eigen::Vector3f> corners,
     std::shared_ptr<Material> material)
-    : Object(std::move(material), AABB(get<0>(corners)
-                                           .cwiseMin(get<1>(corners))
-                                           .cwiseMin(get<2>(corners)),
-                                       get<0>(corners)
-                                           .cwiseMax(get<1>(corners))
-                                           .cwiseMax(get<2>(corners)))),
+    : Geometry(AABB(get<0>(corners)
+                        .cwiseMin(get<1>(corners))
+                        .cwiseMin(get<2>(corners)),
+                    get<0>(corners)
+                        .cwiseMax(get<1>(corners))
+                        .cwiseMax(get<2>(corners))),
+               std::move(material)),
       corners(std::move(corners)) {
     const auto t1 = std::get<1>(this->corners) - std::get<0>(this->corners);
     const auto t2 = std::get<2>(this->corners) - std::get<0>(this->corners);
@@ -74,12 +74,12 @@ Ray Triangle::ray_from(Eigen::Vector3f point) const {
                               gamma * std::get<2>(corners);
     const Eigen::Vector3f diff = target_point - point;
     const Eigen::Vector3f direction = diff.normalized();
-    const float max_t = diff.norm();
-    return {std::move(point), direction, SHADOW_RAY_EPSILON,
-            max_t - SHADOW_RAY_EPSILON};
+    const float distance = diff.norm();
+
+    return {std::move(point), direction, 0.F, distance};
 }
 
-float Triangle::angular_size_from(const Ray& ray, const float distance) const {
+float Triangle::pdf(const Ray& ray, const float distance) const {
     const auto cos_theta = std::abs(normal.dot(ray.direction));
     return area * cos_theta / (distance * distance);
 }

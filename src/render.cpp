@@ -2,6 +2,8 @@
 
 #include <omp.h>
 
+#include <iostream>
+
 #include "path_tracing.h"
 #include "util/ProgressBar.h"
 #include "util/Timer.h"
@@ -21,7 +23,7 @@ std::vector<Eigen::Vector3f> render(const Scene& scene) {
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
             for (unsigned int s = 0; s < scene.camera.samples; s++) {
-                const Ray ray = viewing_ray(scene.camera, i, j, width, height);
+                Ray ray = viewing_ray(scene.camera, i, j, width, height);
                 Eigen::Vector3f rgb = sample(ray, scene);
                 image[i * width + j] += rgb;
             }

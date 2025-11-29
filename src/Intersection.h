@@ -4,14 +4,14 @@
 #include <Eigen/Core>
 #include <limits>
 
-class Object;
+class Geometry;
 
 class Intersection {
    public:
-    Intersection()
+    constexpr Intersection()
         : object(nullptr), t(std::numeric_limits<float>::infinity()) {}
 
-    Intersection(const Object* const object, const float t)
+    Intersection(const Geometry* const object, const float t)
         : object(object), t(t) {}
 
     [[nodiscard]] const Intersection& earlier(const Intersection& other) const {
@@ -20,11 +20,11 @@ class Intersection {
 
     [[nodiscard]] bool has_intersection() const { return object != nullptr; }
 
-    static const Intersection NoIntersection() { return {}; }
+    static constexpr Intersection NoIntersection() { return {}; }
 
-    // Pointer to the intersected object (nullptr if no intersection)
-    const Object* object;
-    // Parametric distance along the ray to the intersection point
+    // Pointer to the intersected object (nullptr if no intersection).
+    const Geometry* object;
+    // Distance along the ray to the intersection point.
     float t;
 };
 

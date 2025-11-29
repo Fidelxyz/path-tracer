@@ -20,6 +20,9 @@ struct Material {
     float clearcoat_roughness;
     float anisotropy;
     float anisotropy_rotation;
+
+    // Precomputed data
+    bool emissive;
 };
 
 #endif

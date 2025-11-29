@@ -4,7 +4,7 @@
 #include <cassert>
 #include <memory>
 
-AABBTree::AABBTree(std::vector<std::unique_ptr<Object>> objects) {
+AABBTree::AABBTree(std::vector<std::unique_ptr<Geometry>> objects) {
     assert(objects.size() >= 2);
 
     for (const auto& obj : objects) {
@@ -20,8 +20,8 @@ AABBTree::AABBTree(std::vector<std::unique_ptr<Object>> objects) {
                        bounding_box.max_corner(longest_axis)) /
                       2;
 
-    std::vector<std::unique_ptr<Object>> objs_left;
-    std::vector<std::unique_ptr<Object>> objs_right;
+    std::vector<std::unique_ptr<Geometry>> objs_left;
+    std::vector<std::unique_ptr<Geometry>> objs_right;
 
     for (auto& obj : objects) {
         if (obj->bounding_box.center()(longest_axis) < mid) {
@@ -35,8 +35,8 @@ AABBTree::AABBTree(std::vector<std::unique_ptr<Object>> objects) {
         // degenerate to even split if one side is empty
 
         const auto compare_center = [longest_axis](
-                                        const std::unique_ptr<Object>& a,
-                                        const std::unique_ptr<Object>& b) {
+                                        const std::unique_ptr<Geometry>& a,
+                                        const std::unique_ptr<Geometry>& b) {
             const float a_center = (a->bounding_box.min_corner(longest_axis) +
                                     a->bounding_box.max_corner(longest_axis)) /
                                    2;
@@ -46,9 +46,10 @@ AABBTree::AABBTree(std::vector<std::unique_ptr<Object>> objects) {
             return a_center < b_center;
         };
 
-        std::vector<std::unique_ptr<Object>> objs = objs_left.size() != 0
-                                                        ? std::move(objs_left)
-                                                        : std::move(objs_right);
+        std::vector<std::unique_ptr<Geometry>> objs =
+            objs_left.size() != 0 ? std::move(objs_left)
+                                  : std::move(objs_right);
+
         const auto mid_iter =
             objs.begin() + static_cast<std::ptrdiff_t>(objs.size() / 2);
         std::nth_element(objs.begin(), mid_iter, objs.end(), compare_center);

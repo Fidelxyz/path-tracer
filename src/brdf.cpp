@@ -10,7 +10,7 @@
 #include <Eigen/Core>
 #include <numbers>
 
-#include "object/Object.h"
+#include "geometry/Geometry.h"
 
 namespace {
 
@@ -65,8 +65,8 @@ Eigen::Vector3f brdf(const Ray& view_to_surface, const Ray& surface_to_light,
     const auto specular_f =
         f0 + (Eigen::Vector3f::Ones() - f0) * pow5(1 - h_dot_v);
 
-    const auto specular =
-        (specular_d * specular_g * specular_f) / (4 * n_dot_l * n_dot_v);
+    const auto specular = (specular_d * specular_g * specular_f) /
+                          (4 * n_dot_l * n_dot_v + EPSILON);
 
     return diffuse + specular;
 }

@@ -4,9 +4,9 @@
 #include <Eigen/Core>
 #include <cassert>
 
-#include "Object.h"
+#include "Geometry.h"
 
-class Triangle : public Object {
+class Triangle : public Geometry {
    public:
     Triangle(
         std::tuple<Eigen::Vector3f, Eigen::Vector3f, Eigen::Vector3f> corners,
@@ -17,15 +17,10 @@ class Triangle : public Object {
     [[nodiscard]] Eigen::Vector3f normal_at(
         const Ray& ray, const Intersection& intersection) const override;
 
-    [[nodiscard]] const Eigen::Vector3f& intensity() const override {
-        assert(material);
-        return material->emission;
-    }
-
     [[nodiscard]] Ray ray_from(Eigen::Vector3f point) const override;
 
-    [[nodiscard]] float angular_size_from(const Ray& ray,
-                                          float distance) const override;
+    [[nodiscard]] float pdf(const Ray& ray,
+                            const float distance) const override;
 
     // A triangle has three corners
     std::tuple<Eigen::Vector3f, Eigen::Vector3f, Eigen::Vector3f> corners;

@@ -16,11 +16,11 @@ add_executable(
   showcase
   src/bvh/AABB.cpp
   src/bvh/AABBTree.cpp
+  src/bvh/build_bvh.cpp
   src/light/DirectionalLight.cpp
-  src/light/Light.cpp
   src/light/PointLight.cpp
-  src/object/Sphere.cpp
-  src/object/Triangle.cpp
+  src/geometry/Sphere.cpp
+  src/geometry/Triangle.cpp
   src/util/ProgressBar.cpp
   src/util/random.cpp
   src/util/Timer.cpp
@@ -29,6 +29,7 @@ add_executable(
   src/path_tracing.cpp
   src/read_json.cpp
   src/render.cpp
+  src/Scene.cpp
   src/viewing_ray.cpp)
 
 # Make third-party as SYSTEM to suppress warnings from them

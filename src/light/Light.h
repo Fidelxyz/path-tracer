@@ -3,21 +3,22 @@
 
 #include <Eigen/Core>
 
-#include "../LightSource.h"
+#include "../Object.h"
 
-const float SHADOW_RAY_EPSILON = 1e-5;
-
-class Light : public LightSource {
+class Light : public Object {
    public:
-    explicit Light(Eigen::Vector3f intensity);
+    explicit Light(Eigen::Vector3f intensity)
+        : intensity(std::move(intensity)) {}
     Light(const Light&) = default;
     Light(Light&&) = delete;
     Light& operator=(const Light&) = default;
     Light& operator=(Light&&) = delete;
     ~Light() override = default;
 
-    [[nodiscard]] const Eigen::Vector3f& intensity() const override;
+    [[nodiscard]] const Eigen::Vector3f& emission() const override {
+        return intensity;
+    }
 
-    Eigen::Vector3f intensity_;
+    Eigen::Vector3f intensity;
 };
 #endif

@@ -4,9 +4,9 @@
 #include <Eigen/Core>
 #include <memory>
 
-#include "../object/Object.h"
+#include "../geometry/Geometry.h"
 
-class AABBTree : public Object {
+class AABBTree : public Geometry {
    public:
     /**
      * Constructs an axis-aligned bounding box (AABB) tree from a list of
@@ -18,12 +18,12 @@ class AABBTree : public Object {
      * @param depth The depth of the current node in the tree (default is 0
      * for the root node).
      */
-    explicit AABBTree(std::vector<std::unique_ptr<Object>> objects);
+    explicit AABBTree(std::vector<std::unique_ptr<Geometry>> objects);
 
     [[nodiscard]] Intersection intersect(const Ray& ray) const override;
 
-    std::unique_ptr<Object> left;
-    std::unique_ptr<Object> right;
+    std::unique_ptr<Geometry> left;
+    std::unique_ptr<Geometry> right;
 };
 
 #endif

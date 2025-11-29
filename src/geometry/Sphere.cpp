@@ -1,14 +1,16 @@
 #include "Sphere.h"
 
 #include <optional>
+#include <random>
 
 #include "../Ray.h"
+#include "../util/random.h"
 
 Sphere::Sphere(Eigen::Vector3f center, const float radius,
                std::shared_ptr<Material> material)
-    : Object(std::move(material),
-             AABB(center - Eigen::Vector3f::Constant(radius),
-                  center + Eigen::Vector3f::Constant(radius))),
+    : Geometry(AABB(center - Eigen::Vector3f::Constant(radius),
+                    center + Eigen::Vector3f::Constant(radius)),
+               std::move(material)),
       center(std::move(center)),
       radius(radius) {}
 
@@ -38,10 +40,10 @@ Intersection Sphere::intersect(const Ray& ray) const {
         return std::nullopt;
     };
 
-    const std::optional<float> t_opt = calc_t(ray);
-    if (!t_opt.has_value()) return Intersection::NoIntersection();
+    const std::optional<float> t = calc_t(ray);
+    if (!t.has_value()) return Intersection::NoIntersection();
 
-    return {this, t_opt.value()};
+    return {this, t.value()};
 }
 
 Eigen::Vector3f Sphere::normal_at(const Ray& ray,
@@ -51,4 +53,26 @@ Eigen::Vector3f Sphere::normal_at(const Ray& ray,
             .normalized();
     if (n.dot(ray.direction) > 0) n = -n;
     return n;
+}
+
+Ray Sphere::ray_from(const Eigen::Vector3f point) const {
+    // Sample a random point on the sphere surface
+    // https://devforum.roblox.com/t/how-to-generate-a-random-rotation-and-much-more/1549051
+    std::uniform_real_distribution<float> uniform_dist(0.F, 1.F);
+    const float a = 2 * std::numbers::pi_v<float> * uniform_dist(rng);
+    const float x = 2 * uniform_dist(rng) - 1;
+    const float r = std::sqrt(1 - x * x);
+    Eigen::Vector3f d = {x, r * std::cos(a), r * std::sin(a)};
+    const auto target_point = this->center + radius * d;
+
+    const Eigen::Vector3f diff = target_point - point;
+    const Eigen::Vector3f direction = diff.normalized();
+    const float distance = diff.norm();
+
+    return {point, direction, 0.F, distance};
+}
+
+float Sphere::pdf([[maybe_unused]] const Ray& ray, const float distance) const {
+    return (std::numbers::pi_v<float> * radius * radius) /
+           (distance * distance);
 }

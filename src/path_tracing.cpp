@@ -3,6 +3,7 @@
  *
  * References:
  * https://sites.cs.ucsb.edu/~lingqi/teaching/resources/GAMES101_Lecture_15.pdf
+ * https://computergraphics.stackexchange.com/questions/5152/progressive-path-tracing-with-explicit-light-sampling
  */
 
 #include "path_tracing.h"
@@ -18,10 +19,13 @@
 namespace {
 
 static const float PROBABILITY_SAMPLE_INDIRECT = 0.5F;
+
 static const int MAX_BOUNCES = 128;
+const float RAY_EPSILON = 1e-5F;
 
 /**
  * Return a random scattered direction within the hemisphere around the normal.
+ * https://devforum.roblox.com/t/how-to-generate-a-random-rotation-and-much-more/1549051
  */
 static Eigen::Vector3f scatter(const Eigen::Vector3f& n) {
     std::uniform_real_distribution<float> uniform_dist(0.F, 1.F);
@@ -34,80 +38,80 @@ static Eigen::Vector3f scatter(const Eigen::Vector3f& n) {
 }
 
 static Eigen::Vector3f path_trace(const Ray& ray, const Scene& scene,
-                                  const int depth) {
-    if (depth >= MAX_BOUNCES) return Eigen::Vector3f::Zero();
+                                  const int bounces) {
+    if (bounces >= MAX_BOUNCES) return Eigen::Vector3f::Zero();
 
-    const Intersection intersection = scene.objects->intersect(ray);
+    const Intersection intersection = scene.geometries->intersect(ray);
     if (!intersection.has_intersection()) return Eigen::Vector3f::Zero();
 
-    const auto& material = intersection.object->material;
     const Eigen::Vector3f normal =
         intersection.object->normal_at(ray, intersection);
-    const Eigen::Vector3f surface_point =
-        ray.origin + intersection.t * ray.direction;
+    Eigen::Vector3f surface_point = ray.origin + intersection.t * ray.direction;
 
     // Contribution from a light source
     const auto sample_direct = [&]() -> Eigen::Vector3f {
-        // Sample a light source or an emissive object
-        assert(!scene.lights.empty() || !scene.emissive_objects.empty());
-        std::uniform_int_distribution<size_t> random_light(
-            0, scene.lights.size() + scene.emissive_objects.size() - 1);
-        const size_t light_idx = random_light(rng);
-        const LightSource* const light =
-            light_idx < scene.lights.size()
-                ? static_cast<LightSource*>(scene.lights[light_idx].get())
-                : scene.emissive_objects[light_idx - scene.lights.size()];
+        // Sample a light or an emissive material
+        const size_t num_lights = scene.emissive_objects.size();
+        std::uniform_int_distribution<size_t> random_light(0, num_lights - 1);
+        const auto light = scene.emissive_objects[random_light(rng)];
 
-        const Ray ray_to_light = light->ray_from(surface_point);
+        Ray ray_to_light = light->ray_from(surface_point);
+        const float distance = ray_to_light.max_t;
 
+        // Check if the light is facing the surface
         const float cos_theta = normal.dot(ray_to_light.direction);
         if (cos_theta <= 0.F) return Eigen::Vector3f::Zero();
 
         // Check for occlusion
+        ray_to_light.min_t += RAY_EPSILON;
+        ray_to_light.max_t -= RAY_EPSILON;
         const Intersection ray_to_light_intersection =
-            scene.objects->intersect(ray_to_light);
+            scene.geometries->intersect(ray_to_light);
         if (ray_to_light_intersection.has_intersection())
             return Eigen::Vector3f::Zero();
 
-        const float p =
-            1.F / light->angular_size_from(ray_to_light, ray_to_light.max_t);
+        const float pdf = light->pdf(ray_to_light, distance);
         const auto brdf_value = brdf(ray, ray_to_light, intersection, normal);
 
-        return light->intensity().cwiseProduct(brdf_value) * cos_theta / p;
+        // emission * brdf * cos_theta / (1 / pdf / num_lights)
+        return light->emission().cwiseProduct(brdf_value) * cos_theta * pdf *
+               num_lights;
     };
 
     // Contribution from indirect lighting
     const auto sample_indirect = [&]() -> Eigen::Vector3f {
-        const Ray reflected_ray = {surface_point, scatter(normal),
-                                   SHADOW_RAY_EPSILON};
+        const Ray reflected_ray = {surface_point, scatter(normal), RAY_EPSILON};
 
         const float cos_theta = normal.dot(reflected_ray.direction);
         if (cos_theta <= 0.F) return Eigen::Vector3f::Zero();
 
         // Check for occlusion
         const Intersection reflected_ray_intersection =
-            scene.objects->intersect(reflected_ray);
+            scene.geometries->intersect(reflected_ray);
         if (!reflected_ray_intersection.has_intersection())
             return Eigen::Vector3f::Zero();
 
         // PDF for uniform hemisphere sampling
-        const float p = 1.F / (2.F * std::numbers::pi_v<float>);
         const auto brdf_value = brdf(ray, reflected_ray, intersection, normal);
 
-        return path_trace(reflected_ray, scene, depth + 1)
+        // L * brdf * cos_theta / (1 / (2 * pi))
+        return path_trace(reflected_ray, scene, bounces + 1)
                    .cwiseProduct(brdf_value) *
-               cos_theta / p;
+               cos_theta * (2 * std::numbers::pi_v<float>);
     };
 
-    // Emission from the surface itself
-    const Eigen::Vector3f& emission = material->emission;
-
-    Eigen::Vector3f color = emission + sample_direct();
+    Eigen::Vector3f color = sample_direct();
 
     // Russian roulette for indirect lighting
     std::uniform_real_distribution<float> uniform_dist(0.F, 1.F);
     if (uniform_dist(rng) < PROBABILITY_SAMPLE_INDIRECT) {
         color += sample_indirect() / PROBABILITY_SAMPLE_INDIRECT;
+    }
+
+    // Ignore emission for indirect bounces, since they are accounted for in
+    // direct lighting sampling
+    if (bounces == 0) {
+        color += intersection.object->emission();
     }
 
     return color;

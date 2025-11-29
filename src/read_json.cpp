@@ -11,10 +11,10 @@
 #include <json.hpp>
 #include <memory>
 
+#include "geometry/Sphere.h"
+#include "geometry/Triangle.h"
 #include "light/DirectionalLight.h"
 #include "light/PointLight.h"
-#include "object/Sphere.h"
-#include "object/Triangle.h"
 
 using json = nlohmann::json;
 
@@ -49,14 +49,14 @@ static Camera parse_camera(const json& j) {
             resolution_x, resolution_y, samples,      exposure};
 }
 
-static Lights parse_lights(const json& j) {
+static std::vector<std::unique_ptr<Light>> parse_lights(const json& j) {
     if (!j.contains("lights")) return {};
     const json& j_lights = j["lights"];
 
     std::vector<std::unique_ptr<Light>> lights;
     lights.reserve(j_lights.size());
     for (const json& j_light : j_lights) {
-        const auto intensity =
+        const Eigen::Vector3f intensity =
             j_light["intensity"] * to_vector3f(j_light["color"]);
 
         if (j_light["type"] == "directional") {
@@ -111,7 +111,7 @@ parse_materials(const json& j) {
     return materials;
 }
 
-static std::vector<std::unique_ptr<Object>> read_stl(
+static std::vector<std::unique_ptr<Geometry>> read_stl(
     const json& jobj, const std::shared_ptr<Material>& material,
     const std::filesystem::path& base_path) {
     std::ifstream stl_file(base_path / jobj["stl"], std::ios::binary);
@@ -126,7 +126,7 @@ static std::vector<std::unique_ptr<Object>> read_stl(
     Eigen::MatrixXf N;
     igl::readSTL(stl_file, V, F, N);
 
-    std::vector<std::unique_ptr<Object>> objects;
+    std::vector<std::unique_ptr<Geometry>> objects;
     objects.reserve(F.rows());
     for (const auto& f : F.rowwise()) {
         objects.emplace_back(std::make_unique<Triangle>(
@@ -136,7 +136,7 @@ static std::vector<std::unique_ptr<Object>> read_stl(
     return objects;
 }
 
-static std::vector<std::unique_ptr<Object>> read_obj(
+static std::vector<std::unique_ptr<Geometry>> read_obj(
     const json& jobj, const std::filesystem::path& base_path) {
     const std::filesystem::path obj_file = base_path / jobj["obj"];
 
@@ -178,10 +178,11 @@ static std::vector<std::unique_ptr<Object>> read_obj(
                      .clearcoat_thickness = material.clearcoat_thickness,
                      .clearcoat_roughness = material.clearcoat_roughness,
                      .anisotropy = material.anisotropy,
-                     .anisotropy_rotation = material.anisotropy_rotation}));
+                     .anisotropy_rotation = material.anisotropy_rotation,
+                     .emissive = to_vector3f(material.emission).any()}));
     }
 
-    std::vector<std::unique_ptr<Object>> objects;
+    std::vector<std::unique_ptr<Geometry>> objects;
 
     for (const auto& shape : tinyobj_shapes) {
         objects.reserve(objects.size() + shape.mesh.num_face_vertices.size());
@@ -218,7 +219,7 @@ static std::vector<std::unique_ptr<Object>> read_obj(
     return objects;
 }
 
-static std::vector<std::unique_ptr<Object>> parse_objects(
+static std::vector<std::unique_ptr<Geometry>> parse_geometries(
     const json& j,
     const std::unordered_map<std::string, std::shared_ptr<Material>>& materials,
     const std::filesystem::path& base_path) {
@@ -228,7 +229,7 @@ static std::vector<std::unique_ptr<Object>> parse_objects(
     }
     const json& j_objs = j["objects"];
 
-    std::vector<std::unique_ptr<Object>> objects;
+    std::vector<std::unique_ptr<Geometry>> objects;
     objects.reserve(j_objs.size());
     for (const json& jobj : j_objs) {
         const std::shared_ptr<Material> material =
@@ -281,9 +282,9 @@ Scene read_json(const std::string& filename) {
     infile >> j;
 
     auto materials = parse_materials(j);
-    auto objects = parse_objects(j, materials, base_path);
+    auto geometries = parse_geometries(j, materials, base_path);
     auto lights = parse_lights(j);
     auto camera = parse_camera(j);
 
-    return {std::move(camera), std::move(objects), std::move(lights)};
+    return {std::move(camera), std::move(geometries), std::move(lights)};
 }

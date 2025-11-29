@@ -5,17 +5,17 @@
 
 class Ray {
    public:
-    Ray(Eigen::Vector3f origin, Eigen::Vector3f direction, float min_t = 0.F,
-        float max_t = std::numeric_limits<float>::infinity())
+    Ray(Eigen::Vector3f origin, Eigen::Vector3f direction,
+        const float min_t = 0.F,
+        const float max_t = std::numeric_limits<float>::infinity())
         : origin(std::move(origin)),
           direction(std::move(direction)),
           min_t(min_t),
           max_t(max_t) {}
 
+    // Origin point of the ray.
     Eigen::Vector3f origin;
-    // Not necessarily unit-length direction vector. (It is often useful to have
-    // non-unit length so that origin+t*direction lands on a special point when
-    // t=1.)
+    // Unit direction vector.
     Eigen::Vector3f direction;
     float min_t;
     float max_t;
