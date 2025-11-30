@@ -1,7 +1,5 @@
 #include "viewing_ray.h"
 
-#include <random>
-
 #include "util/random.h"
 
 Ray viewing_ray(const Camera& camera, const int i, const int j, const int width,

@@ -1,9 +1,8 @@
 #include "PointLight.h"
 
-#include <random>
+#include <numbers>
 
 #include "../util/random.h"
-#include "Light.h"
 
 PointLight::PointLight(Eigen::Vector3f intensity, Eigen::Vector3f position,
                        const float radius)

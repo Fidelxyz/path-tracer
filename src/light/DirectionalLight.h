@@ -1,6 +1,5 @@
 #ifndef DIRECTIONALLIGHT_H
 #define DIRECTIONALLIGHT_H
-#include <Eigen/Core>
 
 #include "Light.h"
 

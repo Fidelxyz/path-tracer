@@ -1,9 +1,6 @@
 #ifndef TRIANGLE_H
 #define TRIANGLE_H
 
-#include <Eigen/Core>
-#include <cassert>
-
 #include "Geometry.h"
 
 class Triangle : public Geometry {

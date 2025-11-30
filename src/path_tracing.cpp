@@ -8,10 +8,9 @@
 
 #include "path_tracing.h"
 
+#include <Eigen/Core>
 #include <numbers>
-#include <random>
 
-#include "Eigen/Core"
 #include "Intersection.h"
 #include "brdf.h"
 #include "util/random.h"

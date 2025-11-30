@@ -1,9 +1,8 @@
 #include "Sphere.h"
 
+#include <numbers>
 #include <optional>
-#include <random>
 
-#include "../Ray.h"
 #include "../util/random.h"
 
 Sphere::Sphere(Eigen::Vector3f center, const float radius,
@@ -41,9 +40,9 @@ Intersection Sphere::intersect(const Ray& ray) const {
     };
 
     const std::optional<float> t = calc_t(ray);
-    if (!t.has_value()) return Intersection::NoIntersection();
+    if (!t) return Intersection::NoIntersection();
 
-    return {this, t.value()};
+    return {this, *t};
 }
 
 Eigen::Vector3f Sphere::normal_at(const Ray& ray,

@@ -6,17 +6,24 @@ Modified from A3: ray-tracing, but modified almost all files.
 
 - OpenMP
 - Use `std::unique_ptr` instead of `std::shared_ptr` when possible
-- Move data in constructor
-- More functional to allow better compiler optimization (const instead of variable)
+- Modernize codes (e.g. Move data in constructor)
 - float instead of double to save memory
 - BVH
+
+## Features
+
+- Anti-alising
+- PBR
+- Multiple Importance Sampling
+- Explicit direct light sampling
+- Gamma correction
 
 ## TODO
 
 - Texture Mapping
-- PBR
 - DOF
-- Anti-alising
+
+https://www.reddit.com/r/GraphicsProgramming/comments/ox0lvm/reducing_fireflies_in_path_tracing/
 
 ## References
 

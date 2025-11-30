@@ -1,9 +1,7 @@
 #include "Triangle.h"
 
 #include <Eigen/Dense>
-#include <random>
 
-#include "../Ray.h"
 #include "../util/random.h"
 
 Triangle::Triangle(

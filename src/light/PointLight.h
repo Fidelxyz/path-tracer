@@ -1,8 +1,6 @@
 #ifndef POINTLIGHT_H
 #define POINTLIGHT_H
 
-#include <Eigen/Core>
-
 #include "Light.h"
 
 class PointLight : public Light {

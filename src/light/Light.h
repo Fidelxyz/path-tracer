@@ -1,8 +1,6 @@
 #ifndef LIGHT_H
 #define LIGHT_H
 
-#include <Eigen/Core>
-
 #include "../Object.h"
 
 class Light : public Object {
