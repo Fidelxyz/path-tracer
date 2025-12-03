@@ -19,7 +19,7 @@ Modified based on [Assignment 3: Ray Tracing](https://github.com/ohnooj/computer
 
 - Parallelized with OpenMP.
 - Better Polymorphism architecture.
-  - Eliminated all necessity for `dynamic_cast`.
+  - Eliminated all `dynamic_cast`.
 - Performance improvements.
   - Replaced `std::shared_ptr` with `std::unique_ptr` or raw pointer where possible.
   - Use move semantics where possible.
@@ -48,6 +48,5 @@ Cook-Torrance BRDF: https://learnopengl.com/PBR/Theory
 Cosine-weighted Importance Sampling: https://ameye.dev/notes/sampling-the-hemisphere/
 
 Importance Sampling for GGX Distribution:
-
 - https://agraphicsguynotes.com/posts/sample_microfacet_brdf/
 - https://schuttejoe.github.io/post/ggximportancesamplingpart1/
