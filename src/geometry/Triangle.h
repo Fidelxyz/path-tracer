@@ -25,6 +25,9 @@ class Triangle : public Geometry {
     Eigen::Vector3f normal;
     // Precomputed area
     float area;
+
+    // Precomputed edges
+    std::tuple<Eigen::Vector3f, Eigen::Vector3f> edges;
 };
 
 #endif

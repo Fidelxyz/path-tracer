@@ -11,7 +11,8 @@ class Ray {
         : origin(std::move(origin)),
           direction(std::move(direction)),
           min_t(min_t),
-          max_t(max_t) {}
+          max_t(max_t),
+          inv_direction(this->direction.cwiseInverse()) {}
 
     // Origin point of the ray.
     Eigen::Vector3f origin;
@@ -19,6 +20,10 @@ class Ray {
     Eigen::Vector3f direction;
     float min_t;
     float max_t;
+
+    // Precomputed multiplication inverse of direction for fast AABB
+    // intersection.
+    Eigen::Vector3f inv_direction;
 };
 
 #endif

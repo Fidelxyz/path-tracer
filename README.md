@@ -21,6 +21,7 @@ Modified based on [Assignment 3: Ray Tracing](https://github.com/ohnooj/computer
 - Better Polymorphism architecture.
   - Eliminated all `dynamic_cast`.
 - Performance improvements.
+  - Optimized ray-object intersection by pre-computing data and Möller–Trumbore intersection algorithm.
   - Replaced `std::shared_ptr` with `std::unique_ptr` or raw pointer where possible.
   - Use move semantics where possible.
   - Replaced 64-bit `double` with 32-bit `float` for floating point data.
@@ -50,3 +51,5 @@ Cosine-weighted Importance Sampling: https://ameye.dev/notes/sampling-the-hemisp
 Importance Sampling for GGX Distribution:
 - https://agraphicsguynotes.com/posts/sample_microfacet_brdf/
 - https://schuttejoe.github.io/post/ggximportancesamplingpart1/
+
+Möller–Trumbore intersection algorithm: https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm

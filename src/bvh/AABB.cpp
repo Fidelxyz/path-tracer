@@ -18,9 +18,9 @@ Eigen::Vector3f AABB::dimensions() const { return max_corner - min_corner; }
 
 bool AABB::intersect(const Ray& ray) const {
     const Eigen::Vector3f t1 =
-        (min_corner - ray.origin).cwiseQuotient(ray.direction);
+        (min_corner - ray.origin).cwiseProduct(ray.inv_direction);
     const Eigen::Vector3f t2 =
-        (max_corner - ray.origin).cwiseQuotient(ray.direction);
+        (max_corner - ray.origin).cwiseProduct(ray.inv_direction);
 
     // Lazy evaluation
     const auto t_min_vec = t1.cwiseMin(t2);

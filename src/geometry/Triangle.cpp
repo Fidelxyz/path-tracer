@@ -3,6 +3,9 @@
 #include <Eigen/Dense>
 
 #include "../util/random.h"
+#include "Eigen/Core"
+
+static const float EPSILON = 1e-6F;
 
 Triangle::Triangle(
     std::tuple<Eigen::Vector3f, Eigen::Vector3f, Eigen::Vector3f> corners,
@@ -15,34 +18,45 @@ Triangle::Triangle(
                         .cwiseMax(get<2>(corners))),
                std::move(material)),
       corners(std::move(corners)) {
-    const auto t1 = std::get<1>(this->corners) - std::get<0>(this->corners);
-    const auto t2 = std::get<2>(this->corners) - std::get<0>(this->corners);
-    const Eigen::Vector3f cross_product = t1.cross(t2);
+    const Eigen::Vector3f edge1 =
+        std::get<1>(this->corners) - std::get<0>(this->corners);
+    const Eigen::Vector3f edge2 =
+        std::get<2>(this->corners) - std::get<0>(this->corners);
+    const Eigen::Vector3f cross_product = edge1.cross(edge2);
     normal = cross_product.normalized();
     area = cross_product.norm() / 2;
+
+    edges = {edge1, edge2};
 }
 
 Intersection Triangle::intersect(const Ray& ray) const {
     if (!bounding_box.intersect(ray)) return Intersection::NoIntersection();
 
-    const auto& x1 = std::get<0>(this->corners);
-    const auto t1 = std::get<1>(this->corners) - std::get<0>(this->corners);
-    const auto t2 = std::get<2>(this->corners) - std::get<0>(this->corners);
+    // Möller–Trumbore intersection algorithm
+    // https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm
 
-    Eigen::Matrix3f a;
-    a << t1, t2, -ray.direction;
-    const auto b = ray.origin - x1;  // auto for lazy evaluation
+    const auto& v0 = std::get<0>(corners);
+    const auto& e1 = std::get<0>(edges);
+    const auto& e2 = std::get<1>(edges);
 
-    const Eigen::Vector3f x = a.partialPivLu().solve(b);
+    // As tested, leaving auto to lazy evaluate is faster.
 
-    const float t = x(2);
+    const auto h = ray.direction.cross(e2);
+    const float det = e1.dot(h);
+    if (std::abs(det) < EPSILON) return Intersection::NoIntersection();
+
+    const float inv_det = 1.F / det;
+
+    const auto s = ray.origin - v0;
+    const float u = inv_det * s.dot(h);
+    if (u < 0.F || u > 1.F) return Intersection::NoIntersection();
+
+    const auto q = s.cross(e1);
+    const float v = inv_det * ray.direction.dot(q);
+    if (v < 0.F || u + v > 1.F) return Intersection::NoIntersection();
+
+    const float t = inv_det * e2.dot(q);
     if (t < ray.min_t || t > ray.max_t) return Intersection::NoIntersection();
-
-    const float alpha = x(0);
-    const float beta = x(1);
-    const float gamma = 1.F - alpha - beta;
-    if (alpha < 0 || beta < 0 || gamma < 0)
-        return Intersection::NoIntersection();
 
     return {this, t};
 }

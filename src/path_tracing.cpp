@@ -19,6 +19,7 @@ namespace {
 static const float PROBABILITY_SAMPLE_INDIRECT = 0.5F;
 
 static const int MAX_BOUNCES = 128;
+const float EPSILON = 1e-6F;
 const float RAY_EPSILON = 1e-5F;
 const float RAY_CLAMP = 10.F;
 
@@ -45,7 +46,7 @@ static Eigen::Vector3f path_trace(const Ray& ray, const Scene& scene,
 
         // Check if the light is facing the surface
         const float cos_theta = normal.dot(ray_to_light.direction);
-        if (cos_theta <= 0.F) return Eigen::Vector3f::Zero();
+        if (cos_theta <= EPSILON) return Eigen::Vector3f::Zero();
 
         // Check for occlusion
         ray_to_light.min_t += RAY_EPSILON;
@@ -70,6 +71,7 @@ static Eigen::Vector3f path_trace(const Ray& ray, const Scene& scene,
         reflected_ray.min_t += RAY_EPSILON;
 
         const float cos_theta = normal.dot(reflected_ray.direction);
+        if (cos_theta <= EPSILON) return Eigen::Vector3f::Zero();
 
         const auto brdf_value = brdf(ray, reflected_ray, intersection, normal);
         const float pdf = brdf_pdf(ray, reflected_ray, intersection, normal);
@@ -95,7 +97,7 @@ static Eigen::Vector3f path_trace(const Ray& ray, const Scene& scene,
         color += intersection.object->emission();
     }
 
-    color.cwiseMin(RAY_CLAMP);
+    color = color.cwiseMin(RAY_CLAMP);
 
     return color;
 }
