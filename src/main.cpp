@@ -5,11 +5,11 @@
 #include <limits>
 #include <vector>
 
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include <stb_image_write.h>
+
 #include "read_json.h"
 #include "render.h"
-
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "stb_image_write.h"
 
 static const float GAMMA = 2.2F;
 

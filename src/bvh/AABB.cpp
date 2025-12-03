@@ -22,8 +22,9 @@ bool AABB::intersect(const Ray& ray) const {
     const Eigen::Vector3f t2 =
         (max_corner - ray.origin).cwiseQuotient(ray.direction);
 
-    const Eigen::Vector3f t_min_vec = t1.cwiseMin(t2);
-    const Eigen::Vector3f t_max_vec = t1.cwiseMax(t2);
+    // Lazy evaluation
+    const auto t_min_vec = t1.cwiseMin(t2);
+    const auto t_max_vec = t1.cwiseMax(t2);
 
     const float t_min = std::max(t_min_vec.maxCoeff(), ray.min_t);
     const float t_max = std::min(t_max_vec.minCoeff(), ray.max_t);

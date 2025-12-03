@@ -22,19 +22,45 @@ static const float PROBABILITY_SAMPLE_INDIRECT = 0.5F;
 static const int MAX_BOUNCES = 128;
 const float RAY_EPSILON = 1e-5F;
 
-/**
- * Return a random scattered direction within the hemisphere around the normal.
- * https://devforum.roblox.com/t/how-to-generate-a-random-rotation-and-much-more/1549051
- */
-static Eigen::Vector3f scatter(const Eigen::Vector3f& n) {
-    std::uniform_real_distribution<float> uniform_dist(0.F, 1.F);
-    const float a = 2 * std::numbers::pi_v<float> * uniform_dist(rng);
-    const float x = 2 * uniform_dist(rng) - 1;
-    const float r = std::sqrt(1 - x * x);
-    Eigen::Vector3f d = {x, r * std::cos(a), r * std::sin(a)};
-    if (d.dot(n) < 0) d = -d;
-    return d;
+static Eigen::Vector3f spherical_to_cartesian(const float theta,
+                                              const float phi) {
+    return {
+        std::sin(theta) * std::cos(phi),
+        std::sin(theta) * std::sin(phi),
+        std::cos(theta),
+    };
 }
+
+/**
+ * Transform a vector from tangent space to world space given the normal.
+ */
+static Eigen::Vector3f from_tangent_space(const Eigen::Vector3f& vector,
+                                          const Eigen::Vector3f& normal) {
+    // https://learnopengl.com/Advanced-Lighting/Normal-Mapping
+
+    // Choose an arbitrary vector that is not parallel to the normal
+    const Eigen::Vector3f up = std::abs(normal.z()) < 0.99F
+                                   ? Eigen::Vector3f::UnitZ()
+                                   : Eigen::Vector3f::UnitY();
+    const Eigen::Vector3f tangent = normal.cross(up).normalized();
+    const Eigen::Vector3f bitangent = normal.cross(tangent).normalized();
+    Eigen::Matrix3f tbn;
+    tbn << tangent, bitangent, normal;
+    return tbn * vector;
+}
+
+static Eigen::Vector3f sample_hemisphere(const Eigen::Vector3f& normal) {
+    // Cosine-weighted hemisphere sampling
+    // https://ameye.dev/notes/sampling-the-hemisphere/
+    std::uniform_real_distribution<float> uniform_dist(0.F, 1.F);
+    const float r1 = uniform_dist(rng);
+    const float r2 = uniform_dist(rng);
+
+    const float theta = std::acos(std::sqrt(1 - r1));
+    const float phi = 2.F * std::numbers::pi_v<float> * r2;
+
+    return from_tangent_space(spherical_to_cartesian(theta, phi), normal);
+};
 
 static Eigen::Vector3f path_trace(const Ray& ray, const Scene& scene,
                                   const int bounces) {
@@ -79,24 +105,16 @@ static Eigen::Vector3f path_trace(const Ray& ray, const Scene& scene,
 
     // Contribution from indirect lighting
     const auto sample_indirect = [&]() -> Eigen::Vector3f {
-        const Ray reflected_ray = {surface_point, scatter(normal), RAY_EPSILON};
+        const Ray reflected_ray = {surface_point, sample_hemisphere(normal),
+                                   RAY_EPSILON};
 
-        const float cos_theta = normal.dot(reflected_ray.direction);
-        if (cos_theta <= 0.F) return Eigen::Vector3f::Zero();
-
-        // Check for occlusion
-        const Intersection reflected_ray_intersection =
-            scene.geometries->intersect(reflected_ray);
-        if (!reflected_ray_intersection.has_intersection())
-            return Eigen::Vector3f::Zero();
-
-        // PDF for uniform hemisphere sampling
         const auto brdf_value = brdf(ray, reflected_ray, intersection, normal);
 
-        // L * brdf * cos_theta / (1 / (2 * pi))
+        // pdf = cos_theta / pi  (cosine-weighted hemisphere sampling)
+        // L * brdf * cos_theta / (cos_theta / pi)
         return path_trace(reflected_ray, scene, bounces + 1)
                    .cwiseProduct(brdf_value) *
-               cos_theta * (2 * std::numbers::pi_v<float>);
+               std::numbers::pi_v<float>;
     };
 
     Eigen::Vector3f color = sample_direct();
