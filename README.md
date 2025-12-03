@@ -1,19 +1,19 @@
-# CSC317 Showcase
+# CSC317 Showcase: Monto Carlo Path Tracer
 
 Modified based on [Assignment 3: Ray Tracing](https://github.com/ohnooj/computer-graphics-ray-tracing), but rewrote most of the codes.
 
 ## Features
 
-- Monto Carlo path tracing.
+- Monto Carlo path tracing. ([`path_tracing.cpp`](src/path_tracing.cpp))
   - With Russian Roulette method.
 - Multiple importance sampling.
-  - Explicit light sampling.
-  - BSDF importance sampling (Both of cosine-weighted hemisphere distribution and GGX distribution).
-- Physically-based BRDF (Cook-Torrance Model).
-- BVH Accelerated.
-- Anti-alising by dithering sensor pixels.
-- Gamma correction.
-- Loading objects and materials from OBJ and MTL files.
+  - Explicit light sampling. ([`path_tracing.cpp`](src/path_tracing.cpp))
+  - BSDF importance sampling (Both of cosine-weighted hemisphere distribution and GGX distribution). ([`brdf.cpp`](src/brdf.cpp))
+- Physically-based BRDF (Cook-Torrance Model). ([`brdf.cpp`](src/brdf.cpp))
+- BVH Accelerated. ([`bvh/AABBTree.cpp`](src/bvh/AABBTree.cpp) & [`bvh/AABB.cpp`](src/bvh/AABB.cpp))
+- Anti-alising by dithering sensor pixels. ([`render.cpp`](src/render.cpp))
+- Gamma correction. ([`main.cpp`](src/main.cpp))
+- Loading objects and materials from OBJ and MTL files. ([`read_json.cpp`](src/read_json.cpp))
 
 ## Improvements
 
