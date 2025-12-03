@@ -25,12 +25,12 @@ add_executable(
   src/util/random.cpp
   src/util/Timer.cpp
   src/brdf.cpp
+  src/Camera.cpp
   src/main.cpp
   src/path_tracing.cpp
   src/read_json.cpp
   src/render.cpp
-  src/Scene.cpp
-  src/viewing_ray.cpp)
+  src/Scene.cpp)
 
 # Make third-party as SYSTEM to suppress warnings from them
 target_include_directories(showcase SYSTEM PRIVATE 3rdparty/include)

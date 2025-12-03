@@ -3,35 +3,17 @@
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
-#include <numbers>
+
+#include "Ray.h"
 
 class Camera {
    public:
-    Camera(Eigen::Vector3f position, Eigen::Vector3f rotation,
-           const float focal_length, const float width, const float height,
+    Camera(Eigen::Vector3f position, const Eigen::Vector3f& rotation,
+           float focal_length, float width, float height,
            unsigned int resolution_x, unsigned int resolution_y,
-           unsigned int samples, const float exposure)
-        : position(std::move(position)),
-          focal_length(focal_length),
-          width(width),
-          height(height),
-          resolution_x(resolution_x),
-          resolution_y(resolution_y),
-          samples(samples),
-          exposure(exposure) {
-        const float pitch = rotation.x() * std::numbers::pi_v<float> / 180.F;
-        const float yaw = rotation.y() * std::numbers::pi_v<float> / 180.F;
-        const float roll = rotation.z() * std::numbers::pi_v<float> / 180.F;
+           unsigned int samples, float exposure);
 
-        Eigen::Matrix3f rot_matrix;
-        rot_matrix = Eigen::AngleAxisf(roll, Eigen::Vector3f::UnitZ()) *
-                     Eigen::AngleAxisf(yaw, Eigen::Vector3f::UnitY()) *
-                     Eigen::AngleAxisf(pitch, Eigen::Vector3f::UnitX());
-
-        v = rot_matrix * Eigen::Vector3f::UnitY();
-        w = rot_matrix * Eigen::Vector3f::UnitZ();
-        u = v.cross(w);
-    }
+    [[nodiscard]] Ray viewing_ray(unsigned int i, unsigned int j) const;
 
     // Camera position.
     Eigen::Vector3f position;

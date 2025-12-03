@@ -11,7 +11,7 @@ Modified based on [Assignment 3: Ray Tracing](https://github.com/ohnooj/computer
   - BSDF importance sampling (Both of cosine-weighted hemisphere distribution and GGX distribution). ([`brdf.cpp`](src/brdf.cpp))
 - Physically-based BRDF (Cook-Torrance Model). ([`brdf.cpp`](src/brdf.cpp))
 - BVH Accelerated. ([`bvh/AABBTree.cpp`](src/bvh/AABBTree.cpp) & [`bvh/AABB.cpp`](src/bvh/AABB.cpp))
-- Anti-alising by dithering sensor pixels. ([`render.cpp`](src/render.cpp))
+- Anti-alising by dithering sensor pixels. ([`Camera.cpp`](src/Camera.cpp))
 - Gamma correction. ([`main.cpp`](src/main.cpp))
 - Loading objects and materials from OBJ and MTL files. ([`read_json.cpp`](src/read_json.cpp))
 
