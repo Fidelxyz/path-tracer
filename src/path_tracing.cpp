@@ -9,7 +9,6 @@
 #include "path_tracing.h"
 
 #include <Eigen/Core>
-#include <numbers>
 
 #include "Intersection.h"
 #include "brdf.h"
@@ -21,50 +20,11 @@ static const float PROBABILITY_SAMPLE_INDIRECT = 0.5F;
 
 static const int MAX_BOUNCES = 128;
 const float RAY_EPSILON = 1e-5F;
-
-static Eigen::Vector3f spherical_to_cartesian(const float theta,
-                                              const float phi) {
-    return {
-        std::sin(theta) * std::cos(phi),
-        std::sin(theta) * std::sin(phi),
-        std::cos(theta),
-    };
-}
-
-/**
- * Transform a vector from tangent space to world space given the normal.
- */
-static Eigen::Vector3f from_tangent_space(const Eigen::Vector3f& vector,
-                                          const Eigen::Vector3f& normal) {
-    // https://learnopengl.com/Advanced-Lighting/Normal-Mapping
-
-    // Choose an arbitrary vector that is not parallel to the normal
-    const Eigen::Vector3f up = std::abs(normal.z()) < 0.99F
-                                   ? Eigen::Vector3f::UnitZ()
-                                   : Eigen::Vector3f::UnitY();
-    const Eigen::Vector3f tangent = normal.cross(up).normalized();
-    const Eigen::Vector3f bitangent = normal.cross(tangent).normalized();
-    Eigen::Matrix3f tbn;
-    tbn << tangent, bitangent, normal;
-    return tbn * vector;
-}
-
-static Eigen::Vector3f sample_hemisphere(const Eigen::Vector3f& normal) {
-    // Cosine-weighted hemisphere sampling
-    // https://ameye.dev/notes/sampling-the-hemisphere/
-    std::uniform_real_distribution<float> uniform_dist(0.F, 1.F);
-    const float r1 = uniform_dist(rng);
-    const float r2 = uniform_dist(rng);
-
-    const float theta = std::acos(std::sqrt(1 - r1));
-    const float phi = 2.F * std::numbers::pi_v<float> * r2;
-
-    return from_tangent_space(spherical_to_cartesian(theta, phi), normal);
-};
+const float RAY_CLAMP = 10.F;
 
 static Eigen::Vector3f path_trace(const Ray& ray, const Scene& scene,
                                   const int bounces) {
-    if (bounces >= MAX_BOUNCES) return Eigen::Vector3f::Zero();
+    if (bounces > MAX_BOUNCES) return Eigen::Vector3f::Zero();
 
     const Intersection intersection = scene.geometries->intersect(ray);
     if (!intersection.has_intersection()) return Eigen::Vector3f::Zero();
@@ -105,16 +65,20 @@ static Eigen::Vector3f path_trace(const Ray& ray, const Scene& scene,
 
     // Contribution from indirect lighting
     const auto sample_indirect = [&]() -> Eigen::Vector3f {
-        const Ray reflected_ray = {surface_point, sample_hemisphere(normal),
-                                   RAY_EPSILON};
+        Ray reflected_ray =
+            brdf_sample(ray, intersection, surface_point, normal);
+        reflected_ray.min_t += RAY_EPSILON;
+
+        const float cos_theta = normal.dot(reflected_ray.direction);
 
         const auto brdf_value = brdf(ray, reflected_ray, intersection, normal);
+        const float pdf = brdf_pdf(ray, reflected_ray, intersection, normal);
 
-        // pdf = cos_theta / pi  (cosine-weighted hemisphere sampling)
-        // L * brdf * cos_theta / (cos_theta / pi)
+        // TODO: Optimize
+        // L * brdf * cos_theta / pdf
         return path_trace(reflected_ray, scene, bounces + 1)
                    .cwiseProduct(brdf_value) *
-               std::numbers::pi_v<float>;
+               cos_theta / pdf;
     };
 
     Eigen::Vector3f color = sample_direct();
@@ -130,6 +94,8 @@ static Eigen::Vector3f path_trace(const Ray& ray, const Scene& scene,
     if (bounces == 0) {
         color += intersection.object->emission();
     }
+
+    color.cwiseMin(RAY_CLAMP);
 
     return color;
 }
