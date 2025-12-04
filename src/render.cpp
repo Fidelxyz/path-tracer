@@ -21,12 +21,12 @@ std::vector<Eigen::Vector3f> render(const Scene& scene) {
 #pragma omp parallel for collapse(2) schedule(dynamic)
     for (unsigned int i = 0; i < height; i++) {
         for (unsigned int j = 0; j < width; j++) {
-            for (unsigned int s = 0; s < scene.camera.samples; s++) {
+            for (unsigned int s = 0; s < scene.options.samples; s++) {
                 Ray ray = scene.camera.viewing_ray(i, j);
                 Eigen::Vector3f rgb = sample(ray, scene);
                 image[i * width + j] += rgb;
             }
-            image[i * width + j] /= static_cast<float>(scene.camera.samples);
+            image[i * width + j] /= static_cast<float>(scene.options.samples);
             image[i * width + j] *= scene.camera.exposure;
 
             progress_bar.update();

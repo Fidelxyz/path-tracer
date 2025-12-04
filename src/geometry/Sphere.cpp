@@ -5,6 +5,8 @@
 
 #include "../util/random.h"
 
+static const float EPSILON = 1e-6F;
+
 Sphere::Sphere(Eigen::Vector3f center, const float radius,
                std::shared_ptr<Material> material)
     : Geometry(AABB(center - Eigen::Vector3f::Constant(radius),
@@ -24,7 +26,7 @@ Intersection Sphere::intersect(const Ray& ray) const {
         const float c = (ray.origin - center).squaredNorm() - (radius * radius);
         const float discriminant = (b * b) - (4 * a * c);
 
-        if (discriminant < 0) return std::nullopt;
+        if (discriminant < EPSILON) return std::nullopt;
 
         // smaller t
         float t = (-b - std::sqrt(discriminant)) / (2 * a);

@@ -1,3 +1,5 @@
+#include <unistd.h>
+
 #include <Eigen/Core>
 #include <cstddef>
 #include <cstdlib>
@@ -14,12 +16,32 @@
 static const float GAMMA = 2.2F;
 
 int main(int argc, char* argv[]) {
-    if (argc != 2) {
-        std::cerr << "Usage: " << argv[0] << " scene.json" << '\n';
+    if (argc < 2) {
+        std::cerr << "Usage: " << argv[0]
+                  << " <scene.json> [-o <output.png>]\n";
         exit(EXIT_FAILURE);
     }
 
-    const Scene scene = read_json(argv[1]);
+    std::string output_filename = "output.png";
+
+    int c = 0;
+    while ((c = getopt(argc, argv, "o:")) != -1) {
+        switch (c) {
+            case 'o':
+                output_filename = std::string(optarg);
+                break;
+            case '?':
+                exit(EXIT_FAILURE);
+            default:
+                abort();
+        }
+    }
+    if (optind >= argc) {
+        std::cerr << "No input JSON scene file provided.\n";
+        exit(EXIT_FAILURE);
+    }
+
+    const Scene scene = read_json(argv[optind]);
 
     const int width = static_cast<int>(scene.camera.resolution_x);
     const int height = static_cast<int>(scene.camera.resolution_y);
@@ -42,5 +64,6 @@ int main(int argc, char* argv[]) {
         output[3 * i + 2] = pixel(2);
     }
 
-    stbi_write_png("output.png", width, height, 3, output.data(), 3 * width);
+    stbi_write_png(output_filename.c_str(), width, height, 3, output.data(),
+                   3 * width);
 }

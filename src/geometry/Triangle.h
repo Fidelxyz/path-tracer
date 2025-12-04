@@ -5,9 +5,9 @@
 
 class Triangle : public Geometry {
    public:
-    Triangle(
-        std::tuple<Eigen::Vector3f, Eigen::Vector3f, Eigen::Vector3f> corners,
-        std::shared_ptr<Material> material);
+    Triangle(std::array<Eigen::Vector3f, 3> vertices,
+             std::array<Eigen::Vector3f, 3> normals,
+             std::shared_ptr<Material> material);
 
     [[nodiscard]] Intersection intersect(const Ray& ray) const override;
 
@@ -19,15 +19,19 @@ class Triangle : public Geometry {
     [[nodiscard]] float pdf(const Ray& ray,
                             const float distance) const override;
 
-    // A triangle has three corners
-    std::tuple<Eigen::Vector3f, Eigen::Vector3f, Eigen::Vector3f> corners;
-    // Precomputed normal vector
-    Eigen::Vector3f normal;
+    std::array<Eigen::Vector3f, 3> vertices;
+    std::array<Eigen::Vector3f, 3> normals;
+
+   private:
+    [[nodiscard]] std::tuple<float, float, float> barycentric_coordinates(
+        const Eigen::Vector3f& p) const;
+
     // Precomputed area
     float area;
-
     // Precomputed edges
-    std::tuple<Eigen::Vector3f, Eigen::Vector3f> edges;
+    std::array<Eigen::Vector3f, 2> edges;
+    // Precomputed data for barycentric_coordinates
+    float d00, d01, d11, inv_denom;
 };
 
 #endif

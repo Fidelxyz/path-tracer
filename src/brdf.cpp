@@ -21,13 +21,13 @@ static const float PI = std::numbers::pi_v<float>;
 static const float EPSILON = 1e-6F;
 
 template <typename T>
-static T mix(const T& x, const T& y, const float a) {
+static constexpr T mix(const T& x, const T& y, const float a) {
     return x * (1 - a) + y * a;
 }
 
-static float pow2(const float x) { return x * x; }
+static constexpr float pow2(const float x) { return x * x; }
 
-static float pow5(const float x) {
+static constexpr float pow5(const float x) {
     const float x2 = x * x;
     return x2 * x2 * x;
 }
@@ -90,12 +90,13 @@ Eigen::Vector3f brdf(const Ray& view_to_surface, const Ray& surface_to_light,
     // Cook-Torrance specular
 
     // Normal Distribution Function (Trowbridge-Reitz GGX)
-    const float a2 = pow2(material->roughness);
+    const float a = pow2(material->roughness);  // a = roughness^2
+    const float a2 = pow2(a);
     const float specular_d =
         a2 / (PI * pow2(pow2(n_dot_h) * (a2 - 1) + 1) + EPSILON);
 
     // Geometry Function (Smith's method with Schlick-GGX)
-    const float k = pow2(material->roughness + 1) / 8;
+    const float k = pow2(a + 1) / 8;
     const float g_sub_1 = n_dot_v / (n_dot_v * (1 - k) + k);
     const float g_sub_2 = n_dot_l / (n_dot_l * (1 - k) + k);
     const float specular_g = g_sub_1 * g_sub_2;
@@ -138,8 +139,8 @@ Ray brdf_sample(const Ray& view_to_surface,
         const float r1 = uniform_dist(rng);
         const float r2 = uniform_dist(rng);
 
-        const float theta =
-            std::atan((material->roughness) * std::sqrt(r1 / (1 - r1)));
+        const float a = pow2(material->roughness);  // a = roughness^2
+        const float theta = std::atan(a * std::sqrt(r1 / (1 - r1)));
         const float phi = 2.F * PI * r2;
 
         const auto h =
@@ -177,16 +178,15 @@ float brdf_pdf(const Ray& view_to_surface, const Ray& surface_to_light,
     const float n_dot_l = normal.dot(surface_to_light.direction);
     const float n_dot_v = normal.dot(-view_to_surface.direction);
 
-    const float cos_theta_h = n_dot_h;
-
     // PDF for diffuse component (cosine-weighted hemisphere)
     const float pdf_diffuse = n_dot_l / PI;
 
     // PDF for specular component (GGX)
-    const float a2 = pow2(material->roughness);
+    const float a = pow2(material->roughness);  // a = roughness^2
+    const float a2 = pow2(a);
     const float pdf_specular =
-        (a2 * cos_theta_h + EPSILON) /
-        (PI * pow2(pow2(cos_theta_h) * (a2 - 1) + 1) + EPSILON) /
+        (a2 * n_dot_h + EPSILON) /
+        (PI * pow2(pow2(n_dot_h) * (a2 - 1) + 1) + EPSILON) /
         (4 * h_dot_l + EPSILON);
 
     const auto [weight_diffuse, weight_specular] =

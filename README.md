@@ -1,10 +1,10 @@
-# CSC317 Showcase: Monto Carlo Path Tracer
+# CSC317 Showcase: Monte Carlo Path Tracer
 
 Modified based on [Assignment 3: Ray Tracing](https://github.com/ohnooj/computer-graphics-ray-tracing), but rewrote most of the codes.
 
 ## Features
 
-- Monto Carlo path tracing. ([`path_tracing.cpp`](src/path_tracing.cpp))
+- Monte Carlo path tracing. ([`path_tracing.cpp`](src/path_tracing.cpp))
   - With Russian Roulette method.
 - Multiple importance sampling.
   - Explicit light sampling. ([`path_tracing.cpp`](src/path_tracing.cpp))
@@ -32,7 +32,6 @@ Modified based on [Assignment 3: Ray Tracing](https://github.com/ohnooj/computer
 
 - Texture Mapping
 - DOF
-- Adaptive Sampling
 
 https://www.reddit.com/r/GraphicsProgramming/comments/ox0lvm/reducing_fireflies_in_path_tracing/
 

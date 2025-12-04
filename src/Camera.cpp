@@ -7,14 +7,13 @@
 Camera::Camera(Eigen::Vector3f position, const Eigen::Vector3f& rotation,
                const float focal_length, const float width, const float height,
                const unsigned int resolution_x, const unsigned int resolution_y,
-               const unsigned int samples, const float exposure)
+               const float exposure)
     : position(std::move(position)),
       focal_length(focal_length),
       width(width),
       height(height),
       resolution_x(resolution_x),
       resolution_y(resolution_y),
-      samples(samples),
       exposure(exposure) {
     const float pitch = rotation.x() * std::numbers::pi_v<float> / 180.F;
     const float yaw = rotation.y() * std::numbers::pi_v<float> / 180.F;

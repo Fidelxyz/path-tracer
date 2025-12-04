@@ -4,9 +4,10 @@
 
 #include "bvh/build_bvh.h"
 
-Scene::Scene(Camera camera, std::vector<std::unique_ptr<Geometry>> geometries,
+Scene::Scene(Options options, Camera camera,
+             std::vector<std::unique_ptr<Geometry>> geometries,
              std::vector<std::unique_ptr<Light>> lights)
-    : camera(std::move(camera)), lights(std::move(lights)) {
+    : options(options), camera(std::move(camera)), lights(std::move(lights)) {
     std::cout << "Geometries: " << geometries.size() << "\n";
     std::cout << "Lights: " << this->lights.size() << "\n";
 

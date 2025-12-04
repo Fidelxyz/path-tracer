@@ -7,26 +7,41 @@
 
 static const float EPSILON = 1e-6F;
 
-Triangle::Triangle(
-    std::tuple<Eigen::Vector3f, Eigen::Vector3f, Eigen::Vector3f> corners,
-    std::shared_ptr<Material> material)
-    : Geometry(AABB(get<0>(corners)
-                        .cwiseMin(get<1>(corners))
-                        .cwiseMin(get<2>(corners)),
-                    get<0>(corners)
-                        .cwiseMax(get<1>(corners))
-                        .cwiseMax(get<2>(corners))),
+Triangle::Triangle(std::array<Eigen::Vector3f, 3> vertices,
+                   std::array<Eigen::Vector3f, 3> normals,
+                   std::shared_ptr<Material> material)
+    : Geometry(AABB(vertices[0].cwiseMin(vertices[1]).cwiseMin(vertices[2]),
+                    vertices[0].cwiseMax(vertices[1]).cwiseMax(vertices[2])),
                std::move(material)),
-      corners(std::move(corners)) {
-    const Eigen::Vector3f edge1 =
-        std::get<1>(this->corners) - std::get<0>(this->corners);
-    const Eigen::Vector3f edge2 =
-        std::get<2>(this->corners) - std::get<0>(this->corners);
-    const Eigen::Vector3f cross_product = edge1.cross(edge2);
-    normal = cross_product.normalized();
-    area = cross_product.norm() / 2;
+      vertices(std::move(vertices)),
+      normals(std::move(normals)) {
+    Eigen::Vector3f edge1 = this->vertices[1] - this->vertices[0];
+    Eigen::Vector3f edge2 = this->vertices[2] - this->vertices[0];
+    area = edge1.cross(edge2).norm() / 2;
 
-    edges = {edge1, edge2};
+    // Precompute data for barycentric coordinates
+    d00 = edge1.dot(edge1);
+    d01 = edge1.dot(edge2);
+    d11 = edge2.dot(edge2);
+    inv_denom = 1.F / (d00 * d11 - d01 * d01);
+
+    edges = {std::move(edge1), std::move(edge2)};
+}
+
+std::tuple<float, float, float> Triangle::barycentric_coordinates(
+    const Eigen::Vector3f& p) const {
+    const Eigen::Vector3f& t0 = edges[0];
+    const Eigen::Vector3f& t1 = edges[1];
+    const Eigen::Vector3f t2 = p - vertices[0];
+
+    const float d20 = t2.dot(t0);
+    const float d21 = t2.dot(t1);
+
+    const float v = (d11 * d20 - d01 * d21) * inv_denom;
+    const float w = (d00 * d21 - d01 * d20) * inv_denom;
+    const float u = 1.0F - v - w;
+
+    return {u, v, w};
 }
 
 Intersection Triangle::intersect(const Ray& ray) const {
@@ -35,7 +50,7 @@ Intersection Triangle::intersect(const Ray& ray) const {
     // Möller–Trumbore intersection algorithm
     // https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm
 
-    const auto& v0 = std::get<0>(corners);
+    const auto& v0 = std::get<0>(vertices);
     const auto& e1 = std::get<0>(edges);
     const auto& e2 = std::get<1>(edges);
 
@@ -48,12 +63,12 @@ Intersection Triangle::intersect(const Ray& ray) const {
     const float inv_det = 1.F / det;
 
     const auto s = ray.origin - v0;
-    const float u = inv_det * s.dot(h);
-    if (u < 0.F || u > 1.F) return Intersection::NoIntersection();
+    const float v = inv_det * s.dot(h);
+    if (v < 0.F || v > 1.F) return Intersection::NoIntersection();
 
     const auto q = s.cross(e1);
-    const float v = inv_det * ray.direction.dot(q);
-    if (v < 0.F || u + v > 1.F) return Intersection::NoIntersection();
+    const float w = inv_det * ray.direction.dot(q);
+    if (w < 0.F || v + w > 1.F) return Intersection::NoIntersection();
 
     const float t = inv_det * e2.dot(q);
     if (t < ray.min_t || t > ray.max_t) return Intersection::NoIntersection();
@@ -61,29 +76,36 @@ Intersection Triangle::intersect(const Ray& ray) const {
     return {this, t};
 }
 
-Eigen::Vector3f Triangle::normal_at(
-    const Ray& ray, [[maybe_unused]] const Intersection& intersection) const {
-    return ray.direction.dot(normal) < 0 ? normal : -normal;
+Eigen::Vector3f Triangle::normal_at(const Ray& ray,
+                                    const Intersection& intersection) const {
+    const auto [u, v, w] =
+        barycentric_coordinates(ray.origin + ray.direction * intersection.t);
+
+    Eigen::Vector3f n =
+        (u * normals[0] + v * normals[1] + w * normals[2]).normalized();
+    if (n.dot(ray.direction) > 0.F) {
+        n = -n;
+    }
+    return n;
 }
 
 Ray Triangle::ray_from(Eigen::Vector3f point) const {
     // Sample a random point on the triangle surface using barycentric
     // coordinates.
     std::uniform_real_distribution<float> uniform_dist(0.F, 1.F);
-    float alpha = uniform_dist(rng);
-    float beta = uniform_dist(rng);
+    float u = uniform_dist(rng);
+    float v = uniform_dist(rng);
 
     // Reflect the mirrored triangle region onto the original triangle.
-    if (alpha + beta > 1.0F) {
-        alpha = 1.0F - alpha;
-        beta = 1.0F - beta;
+    if (u + v > 1.0F) {
+        u = 1.0F - u;
+        v = 1.0F - v;
     }
 
-    const float gamma = 1.0F - alpha - beta;
+    const float w = 1.0F - u - v;
 
-    const auto target_point = alpha * std::get<0>(corners) +
-                              beta * std::get<1>(corners) +
-                              gamma * std::get<2>(corners);
+    const auto target_point =
+        u * vertices[0] + v * vertices[1] + w * vertices[2];
     const Eigen::Vector3f diff = target_point - point;
     const Eigen::Vector3f direction = diff.normalized();
     const float distance = diff.norm();
@@ -92,6 +114,11 @@ Ray Triangle::ray_from(Eigen::Vector3f point) const {
 }
 
 float Triangle::pdf(const Ray& ray, const float distance) const {
+    const Eigen::Vector3f point = ray.origin + ray.direction * distance;
+    const auto [u, v, w] = barycentric_coordinates(point);
+    const auto normal =
+        (u * normals[0] + v * normals[1] + w * normals[2]).normalized();
+
     const auto cos_theta = std::abs(normal.dot(ray.direction));
     return area * cos_theta / (distance * distance);
 }

@@ -6,6 +6,10 @@
 
 class Timer {
    public:
+    Timer(const Timer&) = default;
+    Timer(Timer&&) = delete;
+    Timer& operator=(const Timer&) = default;
+    Timer& operator=(Timer&&) = delete;
     explicit Timer(std::string name);
     ~Timer();
     void stop();

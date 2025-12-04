@@ -21,7 +21,6 @@ static const float PROBABILITY_SAMPLE_INDIRECT = 0.5F;
 static const int MAX_BOUNCES = 128;
 const float EPSILON = 1e-6F;
 const float RAY_EPSILON = 1e-5F;
-const float RAY_CLAMP = 10.F;
 
 static Eigen::Vector3f path_trace(const Ray& ray, const Scene& scene,
                                   const int bounces) {
@@ -76,7 +75,6 @@ static Eigen::Vector3f path_trace(const Ray& ray, const Scene& scene,
         const auto brdf_value = brdf(ray, reflected_ray, intersection, normal);
         const float pdf = brdf_pdf(ray, reflected_ray, intersection, normal);
 
-        // TODO: Optimize
         // L * brdf * cos_theta / pdf
         return path_trace(reflected_ray, scene, bounces + 1)
                    .cwiseProduct(brdf_value) *
@@ -97,7 +95,7 @@ static Eigen::Vector3f path_trace(const Ray& ray, const Scene& scene,
         color += intersection.object->emission();
     }
 
-    color = color.cwiseMin(RAY_CLAMP);
+    color = color.cwiseMin(scene.options.ray_clamp);
 
     return color;
 }
