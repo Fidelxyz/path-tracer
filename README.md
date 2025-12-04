@@ -35,6 +35,16 @@ Modified based on [Assignment 3: Ray Tracing](https://github.com/ohnooj/computer
 
 https://www.reddit.com/r/GraphicsProgramming/comments/ox0lvm/reducing_fireflies_in_path_tracing/
 
+## Rendered Images
+
+### Comparing Parametric Materials
+
+| | Metallic = 0.0 | Metallic = 0.5 | Metallic = 1.0 |
+| --- | :---: | :---: | :---: |
+| Roughness = 0.1 | ![](img/sphere_r0.1_m0.0.png) | ![](img/sphere_r0.1_m0.5.png) | ![](img/sphere_r0.1_m1.0.png) |
+| Roughness = 0.5 | ![](img/sphere_r0.5_m0.5.png) | ![](img/sphere_r0.5_m0.5.png) | ![](img/sphere_r0.5_m1.0.png) |
+| Roughness = 1.0 | ![](img/sphere_r1.0_m0.5.png) | ![](img/sphere_r1.0_m0.5.png) | ![](img/sphere_r1.0_m1.0.png) |
+
 ## References
 
 Models downloaded from Morgan McGuire's [Computer Graphics Archive](https://casual-effects.com/data)
