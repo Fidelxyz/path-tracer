@@ -6,14 +6,15 @@ Modified based on [Assignment 3: Ray Tracing](https://github.com/ohnooj/computer
 
 - Monte Carlo path tracing. ([`path_tracing.cpp`](src/path_tracing.cpp))
   - With Russian Roulette method.
-- Multiple importance sampling.
-  - Explicit light sampling. ([`path_tracing.cpp`](src/path_tracing.cpp))
-  - BSDF importance sampling (Both of cosine-weighted hemisphere distribution and GGX distribution). ([`brdf.cpp`](src/brdf.cpp))
+- Multiple importance sampling. ([`path_tracing.cpp`](src/path_tracing.cpp) & [`brdf.cpp`](src/brdf.cpp))
+  - Explicit light sampling.
+  - BSDF importance sampling (Both of cosine-weighted hemisphere distribution and GGX distribution).
 - Physically-based BRDF (Cook-Torrance Model). ([`brdf.cpp`](src/brdf.cpp))
 - BVH Accelerated. ([`bvh/AABBTree.cpp`](src/bvh/AABBTree.cpp) & [`bvh/AABB.cpp`](src/bvh/AABB.cpp))
+- Texture mapping. ([`material/texture.h`](src/material/texture.h))
 - Anti-alising by dithering sensor pixels. ([`Camera.cpp`](src/Camera.cpp))
-- Gamma correction. ([`main.cpp`](src/main.cpp))
-- Loading objects and materials from OBJ and MTL files. ([`read_json.cpp`](src/read_json.cpp))
+- Gamma correction. ([`main.cpp`](src/main.cpp) & [`reader/gamma_transform.h`](src/reader/gamma_transform,h))
+- Loading objects and materials from OBJ and MTL files. ([`reader/read_obj.cpp`](src/reader/read_obj.cpp))
 
 ## Improvements
 
@@ -23,17 +24,13 @@ Modified based on [Assignment 3: Ray Tracing](https://github.com/ohnooj/computer
 - Performance improvements.
   - Optimized ray-object intersection by pre-computing data and Möller–Trumbore intersection algorithm.
   - Replaced `std::shared_ptr` with `std::unique_ptr` or raw pointer where possible.
-  - Use move semantics where possible.
   - Replaced 64-bit `double` with 32-bit `float` for floating point data.
   - Utilized Eigen's vectorized operations and lazy evaluation where possible.
-- Modernized codes based on C++20 standard.
+- Modernized the code based on C++20 standard.
 
 ## TODO
 
-- Texture Mapping
 - DOF
-
-https://www.reddit.com/r/GraphicsProgramming/comments/ox0lvm/reducing_fireflies_in_path_tracing/
 
 ## Rendered Images
 

@@ -20,22 +20,22 @@ newmtl rightWall
   Pm 0.0000
   
 newmtl floor
-  Kd 0.725 0.71 0.68 # White
+  Kd 0.8 0.8 0.8 # White
   Pr 1.0000
   Pm 0.0000
 
 newmtl ceiling
-  Kd 0.725 0.71 0.68 # White
+  Kd 0.8 0.8 0.8 # White
   Pr 1.0000
   Pm 0.0000
 
 newmtl backWall
-  Kd 0.725 0.71 0.68 # White
+  Kd 0.8 0.8 0.8 # White
   Pr 1.0000
   Pm 0.0000
 
 newmtl light
   Kd 0.7800 0.7800 0.7800
-  Ke 10 10 10
+  Ke 20 20 20
   Pr 1.0000
   Pm 0.0000
