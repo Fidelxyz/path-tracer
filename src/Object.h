@@ -41,9 +41,11 @@ class Object {
     /**
      * Get the emission of the object.
      *
+     * @param [in] texcoords Texture coordinates.
      * @return Emission.
      */
-    [[nodiscard]] virtual const Eigen::Vector3f& emission() const {
+    [[nodiscard]] virtual Eigen::Vector3f emission_at(
+        const Eigen::Vector2f& /*texcoords*/) const {
         throw std::runtime_error("emission() not implemented for this object.");
     }
 };

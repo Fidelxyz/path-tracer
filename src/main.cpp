@@ -7,10 +7,13 @@
 #include <limits>
 #include <vector>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
 
-#include "read_json.h"
+#include "reader/read_json.h"
 #include "render.h"
 
 static const float GAMMA = 2.2F;

@@ -17,8 +17,7 @@ Scene::Scene(Options options, Camera camera,
         emissive_objects.emplace_back(light.get());
     }
     for (const auto& geometry : geometries) {
-        if (geometry->material &&
-            geometry->material->emission.maxCoeff() > 0.F) {
+        if (geometry->material->emissive) {
             emissive_objects.emplace_back(geometry.get());
         }
     }

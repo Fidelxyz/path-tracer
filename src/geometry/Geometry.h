@@ -2,9 +2,9 @@
 #define GEOMETRY_H
 
 #include "../Intersection.h"
-#include "../Material.h"
 #include "../Object.h"
 #include "../bvh/AABB.h"
+#include "../material/Material.h"
 
 class Geometry : public Object {
    public:
@@ -27,17 +27,30 @@ class Geometry : public Object {
      * Get normal at a given point on the object's surface.
      *
      * @param [in] ray Incoming ray.
-     * @param [in] intersection Intersection information.
+     * @param [in] point Point on the object's surface.
      * @return Normal vector at the given point.
      */
     [[nodiscard]] virtual Eigen::Vector3f normal_at(
-        const Ray& /*ray*/, const Intersection& /*intersection*/) const {
+        const Ray& /*ray*/, const Eigen::Vector3f& /*point*/) const {
         throw std::runtime_error(
             "normal_at() not implemented for this object.");
     }
 
-    [[nodiscard]] const Eigen::Vector3f& emission() const override {
-        return material->emission;
+    /**
+     * Get texture coordinates at a given point on the object's surface.
+     *
+     * @param [in] point Point on the object's surface.
+     * @return Texture coordinates at the given point.
+     */
+    [[nodiscard]] virtual Eigen::Vector2f texcoords_at(
+        const Eigen::Vector3f& /*point*/) const {
+        throw std::runtime_error(
+            "texcoords_at() not implemented for this object.");
+    }
+
+    [[nodiscard]] Eigen::Vector3f emission_at(
+        const Eigen::Vector2f& texcoords) const override {
+        return material->emission->sample(texcoords);
     }
 
     AABB bounding_box;

@@ -1,4 +1,8 @@
 {
+    "options": {
+        "samples": 64,
+        "ray_clamp": 10.0
+    },
     "camera": {
         "type": "perspective",
         "focal_length": 0.035,
@@ -15,8 +19,7 @@
         "height": 0.025,
         "width": 0.025,
         "resolution_x": 800,
-        "resolution_y": 800,
-        "samples": 64
+        "resolution_y": 800
     },
     "objects": [
         {

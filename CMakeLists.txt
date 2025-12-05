@@ -19,6 +19,8 @@ add_executable(
   src/bvh/build_bvh.cpp
   src/light/DirectionalLight.cpp
   src/light/PointLight.cpp
+  src/reader/read_json.cpp
+  src/reader/read_obj.cpp
   src/geometry/Sphere.cpp
   src/geometry/Triangle.cpp
   src/util/ProgressBar.cpp
@@ -28,7 +30,6 @@ add_executable(
   src/Camera.cpp
   src/main.cpp
   src/path_tracing.cpp
-  src/read_json.cpp
   src/render.cpp
   src/Scene.cpp)
 
@@ -48,7 +49,8 @@ if(MSVC)
     target_link_options(showcase PRIVATE /LTCG)
   endif()
 else()
-  target_compile_options(showcase PRIVATE -Wall -Wextra -Wpedantic)
+  target_compile_options(showcase PRIVATE -Wall -Wextra -Wpedantic -Wno-psabi)
+  target_link_options(showcase PRIVATE -Wno-psabi)
   if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_compile_options(showcase PRIVATE -O0 -g)
   else()

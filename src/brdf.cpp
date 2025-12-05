@@ -60,12 +60,12 @@ static Eigen::Vector3f spherical_to_cartesian(const float theta,
 }
 
 static std::tuple<float, float> weight_diffuse_specular(
-    const std::shared_ptr<Material>& material, const float n_dot_v) {
+    const Eigen::Vector3f& diffuse, const float metallic, const float n_dot_v) {
     // Weighted by Fresnel term at normal incidence.
     // https://computergraphics.stackexchange.com/questions/13862/how-to-approach-implementing-cook-torrence-microfacet-brdf
     const float albedo =
-        material->diffuse.dot(Eigen::Vector3f(0.2126F, 0.7152F, 0.0722F));
-    const float f0 = mix(0.04F, albedo, material->metallic);
+        diffuse.dot(Eigen::Vector3f(0.2126F, 0.7152F, 0.0722F));
+    const float f0 = mix(0.04F, albedo, metallic);
     const float fresnel = f0 + (1 - f0) * pow5(1 - n_dot_v);
     return {1 - fresnel, fresnel};
 }
@@ -74,8 +74,13 @@ static std::tuple<float, float> weight_diffuse_specular(
 
 Eigen::Vector3f brdf(const Ray& view_to_surface, const Ray& surface_to_light,
                      const Intersection& view_intersection,
-                     const Eigen::Vector3f& normal) {
+                     const Eigen::Vector3f& normal,
+                     const Eigen::Vector2f& texcoords) {
     const auto& material = view_intersection.object->material;
+
+    const Eigen::Vector3f& mat_diffuse = material->diffuse->sample(texcoords);
+    const float mat_roughness = material->roughness->sample(texcoords);
+    const float mat_metallic = material->metallic->sample(texcoords);
 
     const Eigen::Vector3f h =
         (-view_to_surface.direction + surface_to_light.direction).normalized();
@@ -85,25 +90,25 @@ Eigen::Vector3f brdf(const Ray& view_to_surface, const Ray& surface_to_light,
     const float h_dot_v = h.dot(-view_to_surface.direction);
 
     // Lambertian diffuse
-    const auto diffuse = material->diffuse / PI;
+    const auto diffuse = mat_diffuse * (1.F / PI);
 
     // Cook-Torrance specular
 
     // Normal Distribution Function (Trowbridge-Reitz GGX)
-    const float a = pow2(material->roughness);  // a = roughness^2
+    const float a = pow2(mat_roughness);  // a = roughness^2
     const float a2 = pow2(a);
     const float specular_d =
         a2 / (PI * pow2(pow2(n_dot_h) * (a2 - 1) + 1) + EPSILON);
 
     // Geometry Function (Smith's method with Schlick-GGX)
-    const float k = pow2(a + 1) / 8;
+    const float k = pow2(a + 1) * (1.F / 8.F);
     const float g_sub_1 = n_dot_v / (n_dot_v * (1 - k) + k);
     const float g_sub_2 = n_dot_l / (n_dot_l * (1 - k) + k);
     const float specular_g = g_sub_1 * g_sub_2;
 
     // Fresnel Equation (Fresnel-Schlick approximation)
     const auto f0 = mix<Eigen::Vector3f>(Eigen::Vector3f::Constant(0.04F),
-                                         material->diffuse, material->metallic);
+                                         mat_diffuse, mat_metallic);
     const auto specular_f =
         f0 + (Eigen::Vector3f::Ones() - f0) * pow5(1 - h_dot_v);
 
@@ -116,7 +121,8 @@ Eigen::Vector3f brdf(const Ray& view_to_surface, const Ray& surface_to_light,
 Ray brdf_sample(const Ray& view_to_surface,
                 const Intersection& view_intersection,
                 const Eigen::Vector3f& surface_point,
-                const Eigen::Vector3f& normal) {
+                const Eigen::Vector3f& normal,
+                const Eigen::Vector2f& texcoords) {
     const auto& material = view_intersection.object->material;
 
     const auto sample_diffuse = [&]() -> Eigen::Vector3f {
@@ -133,13 +139,15 @@ Ray brdf_sample(const Ray& view_to_surface,
     };
 
     const auto sample_specular = [&]() -> Eigen::Vector3f {
+        const float roughness = material->roughness->sample(texcoords);
+
         // Importance sampling for GGX distribution
         // https://agraphicsguynotes.com/posts/sample_microfacet_brdf/
         std::uniform_real_distribution<float> uniform_dist(0.F, 1.F);
         const float r1 = uniform_dist(rng);
         const float r2 = uniform_dist(rng);
 
-        const float a = pow2(material->roughness);  // a = roughness^2
+        const float a = pow2(roughness);  // a = roughness^2
         const float theta = std::atan(a * std::sqrt(r1 / (1 - r1)));
         const float phi = 2.F * PI * r2;
 
@@ -151,8 +159,10 @@ Ray brdf_sample(const Ray& view_to_surface,
         return direction;
     };
 
+    const Eigen::Vector3f& diffuse = material->diffuse->sample(texcoords);
+    const float metallic = material->metallic->sample(texcoords);
     const auto [weight_diffuse, weight_specular] = weight_diffuse_specular(
-        material, normal.dot(-view_to_surface.direction));
+        diffuse, metallic, normal.dot(-view_to_surface.direction));
 
     Eigen::Vector3f direction;
     std::uniform_real_distribution<float> uniform_dist(0.F, 1.F);
@@ -168,10 +178,14 @@ Ray brdf_sample(const Ray& view_to_surface,
 
 float brdf_pdf(const Ray& view_to_surface, const Ray& surface_to_light,
                const Intersection& view_intersection,
-               const Eigen::Vector3f& normal) {
+               const Eigen::Vector3f& normal,
+               const Eigen::Vector2f& texcoords) {
     const auto& material = view_intersection.object->material;
+    const Eigen::Vector3f& diffuse = material->diffuse->sample(texcoords);
+    const float roughness = material->roughness->sample(texcoords);
+    const float metallic = material->metallic->sample(texcoords);
 
-    const auto h =
+    const Eigen::Vector3f h =
         (-view_to_surface.direction + surface_to_light.direction).normalized();
     const float h_dot_l = h.dot(surface_to_light.direction);
     const float n_dot_h = normal.dot(h);
@@ -179,10 +193,10 @@ float brdf_pdf(const Ray& view_to_surface, const Ray& surface_to_light,
     const float n_dot_v = normal.dot(-view_to_surface.direction);
 
     // PDF for diffuse component (cosine-weighted hemisphere)
-    const float pdf_diffuse = n_dot_l / PI;
+    const float pdf_diffuse = n_dot_l * (1.F / PI);
 
     // PDF for specular component (GGX)
-    const float a = pow2(material->roughness);  // a = roughness^2
+    const float a = pow2(roughness);  // a = roughness^2
     const float a2 = pow2(a);
     const float pdf_specular =
         (a2 * n_dot_h + EPSILON) /
@@ -190,7 +204,7 @@ float brdf_pdf(const Ray& view_to_surface, const Ray& surface_to_light,
         (4 * h_dot_l + EPSILON);
 
     const auto [weight_diffuse, weight_specular] =
-        weight_diffuse_specular(material, n_dot_v);
+        weight_diffuse_specular(diffuse, metallic, n_dot_v);
 
     return pdf_diffuse * weight_diffuse + pdf_specular * weight_specular;
 }

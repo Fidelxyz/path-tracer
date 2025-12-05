@@ -13,7 +13,8 @@ class Light : public Object {
     Light& operator=(Light&&) = delete;
     ~Light() override = default;
 
-    [[nodiscard]] const Eigen::Vector3f& emission() const override {
+    [[nodiscard]] Eigen::Vector3f emission_at(
+        const Eigen::Vector2f& /*texcoords*/) const override {
         return intensity;
     }
 

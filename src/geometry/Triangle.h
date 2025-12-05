@@ -7,12 +7,16 @@ class Triangle : public Geometry {
    public:
     Triangle(std::array<Eigen::Vector3f, 3> vertices,
              std::array<Eigen::Vector3f, 3> normals,
+             std::array<Eigen::Vector2f, 3> texcoords,
              std::shared_ptr<Material> material);
 
     [[nodiscard]] Intersection intersect(const Ray& ray) const override;
 
     [[nodiscard]] Eigen::Vector3f normal_at(
-        const Ray& ray, const Intersection& intersection) const override;
+        const Ray& ray, const Eigen::Vector3f& point) const override;
+
+    [[nodiscard]] Eigen::Vector2f texcoords_at(
+        const Eigen::Vector3f& point) const override;
 
     [[nodiscard]] Ray ray_from(Eigen::Vector3f point) const override;
 
@@ -21,6 +25,7 @@ class Triangle : public Geometry {
 
     std::array<Eigen::Vector3f, 3> vertices;
     std::array<Eigen::Vector3f, 3> normals;
+    std::array<Eigen::Vector2f, 3> texcoords;
 
    private:
     [[nodiscard]] std::tuple<float, float, float> barycentric_coordinates(

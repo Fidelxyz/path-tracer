@@ -29,9 +29,11 @@ static Eigen::Vector3f path_trace(const Ray& ray, const Scene& scene,
     const Intersection intersection = scene.geometries->intersect(ray);
     if (!intersection.has_intersection()) return Eigen::Vector3f::Zero();
 
-    const Eigen::Vector3f normal =
-        intersection.object->normal_at(ray, intersection);
     Eigen::Vector3f surface_point = ray.origin + intersection.t * ray.direction;
+    const Eigen::Vector3f normal =
+        intersection.object->normal_at(ray, surface_point);
+    const Eigen::Vector2f texcoords =
+        intersection.object->texcoords_at(surface_point);
 
     // Contribution from a light source
     const auto sample_direct = [&]() -> Eigen::Vector3f {
@@ -56,24 +58,27 @@ static Eigen::Vector3f path_trace(const Ray& ray, const Scene& scene,
             return Eigen::Vector3f::Zero();
 
         const float pdf = light->pdf(ray_to_light, distance);
-        const auto brdf_value = brdf(ray, ray_to_light, intersection, normal);
+        const auto brdf_value =
+            brdf(ray, ray_to_light, intersection, normal, texcoords);
 
         // emission * brdf * cos_theta / (1 / pdf / num_lights)
-        return light->emission().cwiseProduct(brdf_value) * cos_theta * pdf *
-               num_lights;
+        return light->emission_at(texcoords).cwiseProduct(brdf_value) *
+               cos_theta * pdf * num_lights;
     };
 
     // Contribution from indirect lighting
     const auto sample_indirect = [&]() -> Eigen::Vector3f {
         Ray reflected_ray =
-            brdf_sample(ray, intersection, surface_point, normal);
+            brdf_sample(ray, intersection, surface_point, normal, texcoords);
         reflected_ray.min_t += RAY_EPSILON;
 
         const float cos_theta = normal.dot(reflected_ray.direction);
         if (cos_theta <= EPSILON) return Eigen::Vector3f::Zero();
 
-        const auto brdf_value = brdf(ray, reflected_ray, intersection, normal);
-        const float pdf = brdf_pdf(ray, reflected_ray, intersection, normal);
+        const auto brdf_value =
+            brdf(ray, reflected_ray, intersection, normal, texcoords);
+        const float pdf =
+            brdf_pdf(ray, reflected_ray, intersection, normal, texcoords);
 
         // L * brdf * cos_theta / pdf
         return path_trace(reflected_ray, scene, bounces + 1)
@@ -92,7 +97,7 @@ static Eigen::Vector3f path_trace(const Ray& ray, const Scene& scene,
     // Ignore emission for indirect bounces, since they are accounted for in
     // direct lighting sampling
     if (bounces == 0) {
-        color += intersection.object->emission();
+        color += intersection.object->emission_at(texcoords);
     }
 
     color = color.cwiseMin(scene.options.ray_clamp);

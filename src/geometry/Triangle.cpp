@@ -9,12 +9,14 @@ static const float EPSILON = 1e-6F;
 
 Triangle::Triangle(std::array<Eigen::Vector3f, 3> vertices,
                    std::array<Eigen::Vector3f, 3> normals,
+                   std::array<Eigen::Vector2f, 3> texcoords,
                    std::shared_ptr<Material> material)
     : Geometry(AABB(vertices[0].cwiseMin(vertices[1]).cwiseMin(vertices[2]),
                     vertices[0].cwiseMax(vertices[1]).cwiseMax(vertices[2])),
                std::move(material)),
       vertices(std::move(vertices)),
-      normals(std::move(normals)) {
+      normals(std::move(normals)),
+      texcoords(std::move(texcoords)) {
     Eigen::Vector3f edge1 = this->vertices[1] - this->vertices[0];
     Eigen::Vector3f edge2 = this->vertices[2] - this->vertices[0];
     area = edge1.cross(edge2).norm() / 2;
@@ -77,9 +79,8 @@ Intersection Triangle::intersect(const Ray& ray) const {
 }
 
 Eigen::Vector3f Triangle::normal_at(const Ray& ray,
-                                    const Intersection& intersection) const {
-    const auto [u, v, w] =
-        barycentric_coordinates(ray.origin + ray.direction * intersection.t);
+                                    const Eigen::Vector3f& point) const {
+    const auto [u, v, w] = barycentric_coordinates(point);
 
     Eigen::Vector3f n =
         (u * normals[0] + v * normals[1] + w * normals[2]).normalized();
@@ -87,6 +88,12 @@ Eigen::Vector3f Triangle::normal_at(const Ray& ray,
         n = -n;
     }
     return n;
+}
+
+Eigen::Vector2f Triangle::texcoords_at(const Eigen::Vector3f& point) const {
+    const auto [u, v, w] = barycentric_coordinates(point);
+
+    return u * texcoords[0] + v * texcoords[1] + w * texcoords[2];
 }
 
 Ray Triangle::ray_from(Eigen::Vector3f point) const {

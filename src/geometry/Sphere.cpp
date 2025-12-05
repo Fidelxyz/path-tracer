@@ -4,6 +4,7 @@
 #include <optional>
 
 #include "../util/random.h"
+#include "Eigen/Core"
 
 static const float EPSILON = 1e-6F;
 
@@ -48,12 +49,19 @@ Intersection Sphere::intersect(const Ray& ray) const {
 }
 
 Eigen::Vector3f Sphere::normal_at(const Ray& ray,
-                                  const Intersection& intersection) const {
-    Eigen::Vector3f n =
-        (ray.origin + intersection.t * ray.direction - this->center)
-            .normalized();
+                                  const Eigen::Vector3f& point) const {
+    Eigen::Vector3f n = (point - this->center).normalized();
     if (n.dot(ray.direction) > 0) n = -n;
     return n;
+}
+
+Eigen::Vector2f Sphere::texcoords_at(const Eigen::Vector3f& point) const {
+    const Eigen::Vector3f p = (point - this->center).normalized();
+
+    const float u =
+        0.5F + (std::atan2(p.z(), p.x()) / (2 * std::numbers::pi_v<float>));
+    const float v = 0.5F - (std::asin(p.y()) / std::numbers::pi_v<float>);
+    return {u, v};
 }
 
 Ray Sphere::ray_from(const Eigen::Vector3f point) const {
