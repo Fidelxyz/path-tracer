@@ -21,8 +21,7 @@ class Object {
      * @param [in] point 3D query point in space
      * @return Ray from `point` toward the Light
      */
-    [[nodiscard]] virtual Ray ray_from(
-        [[maybe_unused]] Eigen::Vector3f point) const {
+    [[nodiscard]] virtual Ray ray_from(const Eigen::Vector3f /*point*/) const {
         throw std::runtime_error("ray_from() not implemented for this object.");
     }
 
@@ -34,9 +33,8 @@ class Object {
      * @param [in] distance Distance to the sampled point on the object.
      * @return PDF value.
      */
-    [[nodiscard]] virtual float pdf(
-        [[maybe_unused]] const Ray& ray,
-        [[maybe_unused]] const float distance) const {
+    [[nodiscard]] virtual float pdf(const Ray& /*ray*/,
+                                    const float /*distance*/) const {
         throw std::runtime_error("pdf() not implemented for this object.");
     }
 

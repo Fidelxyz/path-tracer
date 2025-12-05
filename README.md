@@ -45,9 +45,22 @@ https://www.reddit.com/r/GraphicsProgramming/comments/ox0lvm/reducing_fireflies_
 | Roughness = 0.5 | ![](img/sphere_r0.5_m0.5.png) | ![](img/sphere_r0.5_m0.5.png) | ![](img/sphere_r0.5_m1.0.png) |
 | Roughness = 1.0 | ![](img/sphere_r1.0_m0.5.png) | ![](img/sphere_r1.0_m0.5.png) | ![](img/sphere_r1.0_m1.0.png) |
 
-## References
+## Acknowledgements
+
+### Libraries
+
+- [Eigen](https://gitlab.com/libeigen/eigen)
+- OpenMP: For parallelization.
+- [libigl](https://github.com/libigl/libigl): For loading STL files.
+- [tinyobjloader](https://github.com/tinyobjloader/tinyobjloader): For loading OBJ and MTL files.
+- [stb](https://github.com/nothings/stb): For reading and writing images.
+- [json](https://github.com/nlohmann/json): For parsing JSON files.
+
+### Assets
 
 Models downloaded from Morgan McGuire's [Computer Graphics Archive](https://casual-effects.com/data)
+
+### Materials
 
 Monte Carlo path tracing: https://sites.cs.ucsb.edu/~lingqi/teaching/resources/GAMES101_Lecture_15.pdf
 

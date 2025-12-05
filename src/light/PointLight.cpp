@@ -27,8 +27,7 @@ Ray PointLight::ray_from(Eigen::Vector3f point) const {
     return {std::move(point), direction, 0.F, distance};
 }
 
-float PointLight::pdf([[maybe_unused]] const Ray& ray,
-                      const float distance) const {
+float PointLight::pdf(const Ray& /*ray*/, const float distance) const {
     // Total radiance should not depend on the size of the light source,
     // so we fix area = 1.
     return 1 / (distance * distance);

@@ -8,7 +8,7 @@ Ray DirectionalLight::ray_from(Eigen::Vector3f point) const {
     return {std::move(point), -direction};
 }
 
-float DirectionalLight::pdf([[maybe_unused]] const Ray& ray,
-                            [[maybe_unused]] const float distance) const {
+float DirectionalLight::pdf(const Ray& /*ray*/,
+                            const float /*distance*/) const {
     return 1.F;
 }
