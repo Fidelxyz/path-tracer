@@ -1,6 +1,6 @@
 {
     "options": {
-        "samples": 1024,
+        "samples": 128,
         "ray_clamp": 10.0
     },
     "camera": {
