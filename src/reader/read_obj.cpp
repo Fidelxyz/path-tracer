@@ -5,6 +5,7 @@
 #include <Eigen/Core>
 #include <Eigen/Dense>
 #include <cassert>
+#include <exception>
 #include <iostream>
 
 #include "../geometry/Triangle.h"
@@ -143,18 +144,19 @@ void compute_smoothing_shape(
 
 template <typename T, float gamma>
 static std::unique_ptr<Texture<T>> parse_sampler(
-    const std::string_view texture) {
+    const std::filesystem::path& base_path, const std::string_view texture) {
     if (texture.empty()) return nullptr;
-    return read_texture<T, gamma>(texture);
+    return read_texture<T, gamma>(base_path / texture);
 }
 
 template <typename T, float gamma>
-static std::unique_ptr<Sampler<T>> parse_sampler(const std::string_view texture,
-                                                 T constant) {
+static std::unique_ptr<Sampler<T>> parse_sampler(
+    const std::filesystem::path& base_path, const std::string_view texture,
+    T constant) {
     if (texture.empty()) {
         return std::make_unique<Constant<T>>(std::move(constant));
     }
-    return read_texture<T, gamma>(texture, std::move(constant));
+    return read_texture<T, gamma>(base_path / texture, std::move(constant));
 }
 
 }  // namespace
@@ -222,20 +224,23 @@ std::vector<std::unique_ptr<Geometry>> read_obj(
     auto in_materials = reader.GetMaterials();
 
     // Materials
+    const auto base_path = obj_file.parent_path();
     std::vector<std::shared_ptr<Material>> materials;
     materials.reserve(in_materials.size());
     for (auto& material : in_materials) {
         materials.emplace_back(std::make_shared<Material>(Material{
             .diffuse = parse_sampler<Eigen::Vector3f, GAMMA_SRGB>(
-                material.diffuse_texname, to_vector3f(material.diffuse)),
+                base_path, material.diffuse_texname,
+                to_vector3f(material.diffuse)),
             .emission = parse_sampler<Eigen::Vector3f, GAMMA_SRGB>(
-                material.emissive_texname, to_vector3f(material.emission)),
+                base_path, material.emissive_texname,
+                to_vector3f(material.emission)),
             .roughness = parse_sampler<float, GAMMA_LINEAR>(
-                material.roughness_texname, material.roughness),
+                base_path, material.roughness_texname, material.roughness),
             .metallic = parse_sampler<float, GAMMA_LINEAR>(
-                material.metallic_texname, material.metallic),
+                base_path, material.metallic_texname, material.metallic),
             .normal = parse_sampler<Eigen::Vector3f, GAMMA_LINEAR>(
-                material.normal_texname),
+                base_path, material.normal_texname),
             .emissive = material.emissive_texname != "" ||
                         to_vector3f(material.emission).any(),
         }));

@@ -1,0 +1,49 @@
+{
+    "options": {
+        "samples": 128,
+        "ray_clamp": 10
+    },
+    "camera": {
+        "type": "perspective",
+        "focal_length": 75,
+        "position": [
+            2,
+            1.8,
+            2
+        ],
+        "rotation": [
+            -25,
+            45,
+            0
+        ],
+        "height": 35,
+        "width": 35,
+        "resolution_x": 1000,
+        "resolution_y": 1000
+    },
+    "materials": [
+        {
+            "name": "material",
+            "diffuse": "metal_plate_02_2k/metal_plate_02_diff_2k.jpg",
+            "roughness": "metal_plate_02_2k/metal_plate_02_rough_2k.png",
+            "metallic": "metal_plate_02_2k/metal_plate_02_metal_2k.png",
+            "normal": "metal_plate_02_2k/metal_plate_02_nor_gl_2k.png"
+        }
+    ],
+    "objects": [
+        {
+            "type": "obj",
+            "obj": "material_test/material_test.obj"
+        },
+        {
+            "type": "sphere",
+            "material": "material",
+            "center": [
+                0,
+                0.5,
+                0
+            ],
+            "radius": 0.5
+        }
+    ]
+}

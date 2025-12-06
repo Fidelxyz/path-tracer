@@ -8,6 +8,7 @@
 #include "brdf.h"
 
 #include <Eigen/Dense>
+#include <iostream>
 #include <numbers>
 #include <random>
 
@@ -83,9 +84,9 @@ Eigen::Vector3f brdf(const Ray& view_to_surface, const Ray& surface_to_light,
 
     const Eigen::Vector3f h =
         (-view_to_surface.direction + surface_to_light.direction).normalized();
-    const float n_dot_h = normal.dot(h);
+    const float n_dot_h = std::max(normal.dot(h), 0.F);
     const float n_dot_l = normal.dot(surface_to_light.direction);
-    const float n_dot_v = normal.dot(-view_to_surface.direction);
+    const float n_dot_v = std::max(normal.dot(-view_to_surface.direction), 0.F);
     const float h_dot_v = h.dot(-view_to_surface.direction);
 
     // Lambertian diffuse
@@ -186,10 +187,10 @@ float brdf_pdf(const Ray& view_to_surface, const Ray& surface_to_light,
 
     const Eigen::Vector3f h =
         (-view_to_surface.direction + surface_to_light.direction).normalized();
-    const float h_dot_l = h.dot(surface_to_light.direction);
-    const float n_dot_h = normal.dot(h);
+    const float n_dot_h = std::max(normal.dot(h), 0.F);
     const float n_dot_l = normal.dot(surface_to_light.direction);
-    const float n_dot_v = normal.dot(-view_to_surface.direction);
+    const float n_dot_v = std::max(normal.dot(-view_to_surface.direction), 0.F);
+    const float h_dot_l = h.dot(surface_to_light.direction);
 
     // PDF for diffuse component (cosine-weighted hemisphere)
     const float pdf_diffuse = n_dot_l / PI;
@@ -197,10 +198,9 @@ float brdf_pdf(const Ray& view_to_surface, const Ray& surface_to_light,
     // PDF for specular component (GGX)
     const float a = pow2(roughness);  // a = roughness^2
     const float a2 = pow2(a);
-    const float pdf_specular =
-        (a2 * n_dot_h + EPSILON) /
-        (PI * pow2(pow2(n_dot_h) * (a2 - 1) + 1) + EPSILON) /
-        (4 * h_dot_l + EPSILON);
+    const float pdf_specular = (a2 * n_dot_h) /
+                               (PI * pow2(pow2(n_dot_h) * (a2 - 1) + 1)) /
+                               (4 * h_dot_l);
 
     const auto [weight_diffuse, weight_specular] =
         weight_diffuse_specular(diffuse, metallic, n_dot_v);

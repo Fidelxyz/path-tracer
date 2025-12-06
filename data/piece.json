@@ -1,0 +1,97 @@
+{
+    "options": {
+        "samples": 1024,
+        "ray_clamp": 10
+    },
+    "camera": {
+        "type": "perspective",
+        "focal_length": 75,
+        "position": [
+            1.45,
+            1.55,
+            2
+        ],
+        "rotation": [
+            -26.2,
+            35.2,
+            0
+        ],
+        "height": 35,
+        "width": 35,
+        "resolution_x": 2000,
+        "resolution_y": 2000
+    },
+    "materials": [
+        {
+            "name": "metal_plate",
+            "diffuse": "metal_plate_02_2k/metal_plate_02_diff_2k.jpg",
+            "roughness": "metal_plate_02_2k/metal_plate_02_rough_2k.png",
+            "metallic": "metal_plate_02_2k/metal_plate_02_metal_2k.png",
+            "normal": "metal_plate_02_2k/metal_plate_02_nor_gl_2k.png"
+        },
+        {
+            "name": "hessian",
+            "diffuse": "hessian_380_2k/hessian_380_diff_2k.jpg",
+            "roughness": "hessian_380_2k/hessian_380_rough_2k.png",
+            "metallic": "hessian_380_2k/hessian_380_metal_2k.png"
+        },
+        {
+            "name": "wood_floor_deck",
+            "diffuse": "wood_floor_deck_2k/wood_floor_deck_diff_2k.jpg",
+            "roughness": "wood_floor_deck_2k/wood_floor_deck_rough_2k.png",
+            "normal": "wood_floor_deck_2k/wood_floor_deck_nor_gl_2k.png"
+        },
+        {
+            "name": "gray_rocks",
+            "diffuse": "gray_rocks_2k/gray_rocks_diff_2k.jpg",
+            "roughness": "gray_rocks_2k/gray_rocks_rough_2k.png",
+            "normal": "gray_rocks_2k/gray_rocks_nor_gl_2k.png"
+        }
+    ],
+    "objects": [
+        {
+            "type": "obj",
+            "obj": "material_test/material_test.obj"
+        },
+        {
+            "type": "sphere",
+            "material": "gray_rocks",
+            "center": [
+                -0.25,
+                0.225,
+                -0.146
+            ],
+            "radius": 0.225
+        },
+        {
+            "type": "sphere",
+            "material": "metal_plate",
+            "center": [
+                0.25,
+                0.225,
+                -0.146
+            ],
+            "radius": 0.225
+        },
+        {
+            "type": "sphere",
+            "material": "wood_floor_deck",
+            "center": [
+                0,
+                0.225,
+                0.289
+            ],
+            "radius": 0.225
+        },
+        {
+            "type": "sphere",
+            "material": "hessian",
+            "center": [
+                0,
+                0.56,
+                0
+            ],
+            "radius": 0.225
+        }
+    ]
+}

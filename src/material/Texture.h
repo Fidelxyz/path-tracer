@@ -15,7 +15,7 @@ class Texture : public Sampler<T> {
     [[nodiscard]] T sample(const Eigen::Vector2f& uv) const override {
         // Bilinear interpolation
         const float x = uv.x() * width - 0.5F;
-        const float y = uv.y() * height - 0.5F;
+        const float y = (1 - uv.y()) * height - 0.5F;
 
         int x0 = static_cast<int>(std::floor(x));
         int y0 = static_cast<int>(std::floor(y));

@@ -69,9 +69,9 @@ Eigen::Matrix3f Sphere::tangent_space_at(const Eigen::Vector3f& point,
     // d(p) / d(theta)
     Eigen::Vector3f tangent =
         Eigen::Vector3f{
-            -std::sin(theta) * std::sin(phi),
+            std::sin(theta) * std::sin(phi),
             0.F,
-            std::cos(theta) * std::sin(phi),
+            -std::cos(theta) * std::sin(phi),
         }
             .normalized();
 
@@ -88,8 +88,8 @@ Eigen::Vector2f Sphere::texcoords_at(const Eigen::Vector3f& point) const {
     const Eigen::Vector3f p = (point - this->center).normalized();
 
     const float u =
-        0.5F + (std::atan2(p.z(), p.x()) / (2 * std::numbers::pi_v<float>));
-    const float v = 0.5F - (std::asin(p.y()) / std::numbers::pi_v<float>);
+        0.5F - (std::atan2(p.z(), p.x()) / (2 * std::numbers::pi_v<float>));
+    const float v = 0.5F + (std::asin(p.y()) / std::numbers::pi_v<float>);
     return {u, v};
 }
 

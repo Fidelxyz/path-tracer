@@ -94,7 +94,7 @@ static Eigen::Vector3f path_trace(const Ray& ray, const Scene& scene,
         // L * brdf * cos_theta / pdf
         return path_trace(reflected_ray, scene, bounces + 1)
                    .cwiseProduct(brdf_value) *
-               cos_theta / pdf;
+               cos_theta / (pdf + EPSILON);
     };
 
     Eigen::Vector3f color = sample_direct();

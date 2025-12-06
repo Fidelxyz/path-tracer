@@ -1,6 +1,6 @@
 {
     "options": {
-        "samples": 64,
+        "samples": 256,
         "ray_clamp": 10.0
     },
     "camera": {
@@ -18,8 +18,8 @@
         ],
         "height": 0.025,
         "width": 0.025,
-        "resolution_x": 800,
-        "resolution_y": 800
+        "resolution_x": 2000,
+        "resolution_y": 2000
     },
     "objects": [
         {

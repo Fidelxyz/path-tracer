@@ -1,15 +1,19 @@
-# CSC317 Showcase: Monte Carlo Path Tracer
+# Monte Carlo Path Tracer
 
-Modified based on [Assignment 3: Ray Tracing](https://github.com/ohnooj/computer-graphics-ray-tracing), but rewrote most of the codes.
+![](img/piece_2.png)
+
+![](img/piece_1.png)
+
+Modified from [Assignment 3: Ray Tracing](https://github.com/ohnooj/computer-graphics-ray-tracing), but rewrote most of the codes.
 
 ## Features
 
-- Monte Carlo path tracing. ([`path_tracing.cpp`](src/path_tracing.cpp))
+- **Monte Carlo path tracing**. ([`path_tracing.cpp`](src/path_tracing.cpp))
   - With Russian Roulette method.
-- Multiple importance sampling. ([`path_tracing.cpp`](src/path_tracing.cpp) & [`brdf.cpp`](src/brdf.cpp))
+- **Multiple importance sampling**. ([`path_tracing.cpp`](src/path_tracing.cpp) & [`brdf.cpp`](src/brdf.cpp))
   - Explicit light sampling.
   - BSDF importance sampling (Both of cosine-weighted hemisphere distribution and GGX distribution).
-- Physically-based BRDF (Cook-Torrance Model). ([`brdf.cpp`](src/brdf.cpp))
+- **Physically-based BRDF** (Cook-Torrance Model). ([`brdf.cpp`](src/brdf.cpp))
 - BVH Accelerated. ([`bvh/AABBTree.cpp`](src/bvh/AABBTree.cpp) & [`bvh/AABB.cpp`](src/bvh/AABB.cpp))
 - Texture mapping. ([`material/texture.h`](src/material/texture.h))
 - Normal mapping. ([`path_tracing.cpp`](src/path_tracing.cpp))
@@ -29,11 +33,33 @@ Modified based on [Assignment 3: Ray Tracing](https://github.com/ohnooj/computer
   - Utilized Eigen's vectorized operations and lazy evaluation where possible.
 - Modernized the code based on C++20 standard.
 
-## TODO
+## Instructions
 
-- DOF
+### Build
+
+```bash
+cmake --preset release
+cd build
+make -j
+```
+
+### Usage
+
+```bash
+./path_tracer <scene.json> [-o <output.png>]
+```
+
+Example scene files can be found in the [`data/`](data/) directory.
+
+If the output file is not specified, the rendered image will be saved as `output.png` by default.
 
 ## Rendered Images
+
+### Textured Materials
+
+| ![](img/material-gray-rocks.png) | ![](img/material-hessian.png) |
+| :---: | :---: |
+| ![](img/material-metal-plate.png) | ![](img/material-wood-floor-deck.png) |
 
 ### Comparing Parametric Materials
 
@@ -42,6 +68,14 @@ Modified based on [Assignment 3: Ray Tracing](https://github.com/ohnooj/computer
 | Roughness = 0.1 | ![](img/sphere_r0.1_m0.0.png) | ![](img/sphere_r0.1_m0.5.png) | ![](img/sphere_r0.1_m1.0.png) |
 | Roughness = 0.5 | ![](img/sphere_r0.5_m0.5.png) | ![](img/sphere_r0.5_m0.5.png) | ![](img/sphere_r0.5_m1.0.png) |
 | Roughness = 1.0 | ![](img/sphere_r1.0_m0.5.png) | ![](img/sphere_r1.0_m0.5.png) | ![](img/sphere_r1.0_m1.0.png) |
+
+### Comparing Samples Per Pixel (SPP)
+
+| ![](img/cornell-box_1spp.png) | ![](img/cornell-box_4spp.png) | ![](img/cornell-box_16spp.png) |
+| :---: | :---: | :---: |
+| SPP = 1 | SPP = 4 | SPP = 16 |
+| ![](img/cornell-box_64spp.png) | ![](img/cornell-box_256spp.png) | ![](img/cornell-box_1024spp.png) |
+| SPP = 64 | SPP = 256 | SPP = 1024 |
 
 ## Acknowledgements
 
@@ -58,6 +92,7 @@ Modified based on [Assignment 3: Ray Tracing](https://github.com/ohnooj/computer
 
 - Morgan McGuire's [Computer Graphics Archive](https://casual-effects.com/data)
 - [Poly Haven](https://polyhaven.com/)
+- [Blender](https://www.blender.org/)
 
 ### Materials
 
@@ -74,3 +109,5 @@ Importance Sampling for GGX Distribution:
 - https://schuttejoe.github.io/post/ggximportancesamplingpart1/
 
 Möller–Trumbore intersection algorithm: https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm
+
+Normal Mapping: https://learnopengl.com/Advanced-Lighting/Normal-Mapping
