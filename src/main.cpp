@@ -13,10 +13,9 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
 
+#include "reader/gamma_transform.h"
 #include "reader/read_json.h"
 #include "render.h"
-
-static const float GAMMA = 2.2F;
 
 int main(int argc, char* argv[]) {
     if (argc < 2) {
@@ -54,7 +53,7 @@ int main(int argc, char* argv[]) {
 
     for (size_t i = 0; i < image.size(); i++) {
         auto color = image[i]
-                         .cwisePow(1.F / GAMMA)
+                         .cwisePow(1.F / GAMMA_SRGB)
                          .cwiseMax(Eigen::Vector3f::Zero())
                          .cwiseMin(Eigen::Vector3f::Ones());
 

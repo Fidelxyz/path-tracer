@@ -8,7 +8,6 @@
 #include "brdf.h"
 
 #include <Eigen/Dense>
-#include <iostream>
 #include <numbers>
 #include <random>
 

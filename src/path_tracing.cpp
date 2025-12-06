@@ -16,11 +16,11 @@
 
 namespace {
 
+static const int MAX_BOUNCES = 8;
 static const float PROBABILITY_SAMPLE_INDIRECT = 0.5F;
 
-static const int MAX_BOUNCES = 128;
-const float EPSILON = 1e-6F;
-const float RAY_EPSILON = 1e-5F;
+static const float EPSILON = 1e-6F;
+static const float RAY_EPSILON = 1e-5F;
 
 static Eigen::Vector3f path_trace(const Ray& ray, const Scene& scene,
                                   const int bounces) {
