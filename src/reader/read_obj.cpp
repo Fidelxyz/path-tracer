@@ -142,6 +142,13 @@ void compute_smoothing_shape(
 }
 
 template <typename T, float gamma>
+static std::unique_ptr<Texture<T>> parse_sampler(
+    const std::string_view texture) {
+    if (texture.empty()) return nullptr;
+    return read_texture<T, gamma>(texture);
+}
+
+template <typename T, float gamma>
 static std::unique_ptr<Sampler<T>> parse_sampler(const std::string_view texture,
                                                  T constant) {
     if (texture.empty()) {
@@ -200,14 +207,12 @@ std::vector<std::unique_ptr<Geometry>> read_obj(
     reader_config.mtl_search_path = obj_file.parent_path();
 
     tinyobj::ObjReader reader;
-
     if (!reader.ParseFromFile(obj_file, reader_config)) {
         if (!reader.Error().empty()) {
             std::cerr << "TinyObjReader: " << reader.Error();
         }
         exit(EXIT_FAILURE);
     }
-
     if (!reader.Warning().empty()) {
         std::cout << "TinyObjReader: " << reader.Warning();
     }
@@ -229,6 +234,8 @@ std::vector<std::unique_ptr<Geometry>> read_obj(
                 material.roughness_texname, material.roughness),
             .metallic = parse_sampler<float, GAMMA_LINEAR>(
                 material.metallic_texname, material.metallic),
+            .normal = parse_sampler<Eigen::Vector3f, GAMMA_LINEAR>(
+                material.normal_texname),
             .emissive = material.emissive_texname != "" ||
                         to_vector3f(material.emission).any(),
         }));

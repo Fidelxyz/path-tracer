@@ -11,7 +11,6 @@
 #include <numbers>
 #include <random>
 
-#include "Eigen/Core"
 #include "geometry/Geometry.h"
 #include "util/random.h"
 
@@ -90,7 +89,7 @@ Eigen::Vector3f brdf(const Ray& view_to_surface, const Ray& surface_to_light,
     const float h_dot_v = h.dot(-view_to_surface.direction);
 
     // Lambertian diffuse
-    const auto diffuse = mat_diffuse * (1.F / PI);
+    const auto diffuse = mat_diffuse / PI;
 
     // Cook-Torrance specular
 
@@ -101,7 +100,7 @@ Eigen::Vector3f brdf(const Ray& view_to_surface, const Ray& surface_to_light,
         a2 / (PI * pow2(pow2(n_dot_h) * (a2 - 1) + 1) + EPSILON);
 
     // Geometry Function (Smith's method with Schlick-GGX)
-    const float k = pow2(a + 1) * (1.F / 8.F);
+    const float k = pow2(a + 1) / 8;
     const float g_sub_1 = n_dot_v / (n_dot_v * (1 - k) + k);
     const float g_sub_2 = n_dot_l / (n_dot_l * (1 - k) + k);
     const float specular_g = g_sub_1 * g_sub_2;
@@ -133,7 +132,7 @@ Ray brdf_sample(const Ray& view_to_surface,
         const float r2 = uniform_dist(rng);
 
         const float theta = std::acos(std::sqrt(1 - r1));
-        const float phi = 2.F * PI * r2;
+        const float phi = 2 * PI * r2;
 
         return from_tangent_space(spherical_to_cartesian(theta, phi), normal);
     };
@@ -149,7 +148,7 @@ Ray brdf_sample(const Ray& view_to_surface,
 
         const float a = pow2(roughness);  // a = roughness^2
         const float theta = std::atan(a * std::sqrt(r1 / (1 - r1)));
-        const float phi = 2.F * PI * r2;
+        const float phi = 2 * PI * r2;
 
         const auto h =
             from_tangent_space(spherical_to_cartesian(theta, phi), normal);
@@ -193,7 +192,7 @@ float brdf_pdf(const Ray& view_to_surface, const Ray& surface_to_light,
     const float n_dot_v = normal.dot(-view_to_surface.direction);
 
     // PDF for diffuse component (cosine-weighted hemisphere)
-    const float pdf_diffuse = n_dot_l * (1.F / PI);
+    const float pdf_diffuse = n_dot_l / PI;
 
     // PDF for specular component (GGX)
     const float a = pow2(roughness);  // a = roughness^2

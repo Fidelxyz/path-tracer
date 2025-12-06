@@ -13,6 +13,10 @@ class Sphere : public Geometry {
     [[nodiscard]] Eigen::Vector3f normal_at(
         const Ray& ray, const Eigen::Vector3f& point) const override;
 
+    [[nodiscard]] Eigen::Matrix3f tangent_space_at(
+        const Eigen::Vector3f& point,
+        const Eigen::Vector3f& normal) const override;
+
     [[nodiscard]] Eigen::Vector2f texcoords_at(
         const Eigen::Vector3f& point) const override;
 

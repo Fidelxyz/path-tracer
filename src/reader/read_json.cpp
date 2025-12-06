@@ -89,6 +89,17 @@ static std::vector<std::unique_ptr<Light>> parse_lights(const json& j) {
 }
 
 template <typename T, float gamma>
+static std::unique_ptr<Texture<T>> parse_sampler(
+    const json& jmat, const std::string_view key,
+    const std::filesystem::path& base_path) {
+    if (jmat.contains(key) && jmat[key].is_string()) {
+        return read_texture<T, gamma>(base_path / jmat[key]);
+    } else {
+        return nullptr;
+    }
+};
+
+template <typename T, float gamma>
 static std::unique_ptr<Sampler<T>> parse_sampler(
     const json& jmat, const std::string_view key,
     const std::filesystem::path& base_path, T&& default_value) {
@@ -113,7 +124,7 @@ parse_materials(const json& j, const std::filesystem::path& base_path) {
 
         auto diffuse = parse_sampler<Eigen::Vector3f, GAMMA_SRGB>(
             jmat, "diffuse", base_path, Eigen::Vector3f::Ones());
-        auto emission = parse_sampler<Eigen::Vector3f, GAMMA_LINEAR>(
+        auto emission = parse_sampler<Eigen::Vector3f, GAMMA_SRGB>(
             jmat, "emission", base_path, Eigen::Vector3f::Zero());
 
         const bool emissive = jmat.contains("emission") &&
@@ -124,12 +135,15 @@ parse_materials(const json& j, const std::filesystem::path& base_path) {
                                                             base_path, 1.F);
         auto metallic = parse_sampler<float, GAMMA_LINEAR>(jmat, "metallic",
                                                            base_path, 0.F);
+        auto normal = parse_sampler<Eigen::Vector3f, GAMMA_LINEAR>(
+            jmat, "normal", base_path);
 
         materials[name] = std::make_shared<Material>(
             Material{.diffuse = std::move(diffuse),
                      .emission = std::move(emission),
                      .roughness = std::move(roughness),
                      .metallic = std::move(metallic),
+                     .normal = std::move(normal),
                      .emissive = emissive});
     }
     return materials;

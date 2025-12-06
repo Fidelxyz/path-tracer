@@ -12,8 +12,9 @@ Modified based on [Assignment 3: Ray Tracing](https://github.com/ohnooj/computer
 - Physically-based BRDF (Cook-Torrance Model). ([`brdf.cpp`](src/brdf.cpp))
 - BVH Accelerated. ([`bvh/AABBTree.cpp`](src/bvh/AABBTree.cpp) & [`bvh/AABB.cpp`](src/bvh/AABB.cpp))
 - Texture mapping. ([`material/texture.h`](src/material/texture.h))
+- Normal mapping. ([`path_tracing.cpp`](src/path_tracing.cpp))
 - Anti-alising by dithering sensor pixels. ([`Camera.cpp`](src/Camera.cpp))
-- Gamma correction. ([`main.cpp`](src/main.cpp) & [`reader/gamma_transform.h`](src/reader/gamma_transform,h))
+- Gamma correction. ([`main.cpp`](src/main.cpp) & [`reader/gamma_transform.h`](src/reader/gamma_transform.h))
 - Loading objects and materials from OBJ and MTL files. ([`reader/read_obj.cpp`](src/reader/read_obj.cpp))
 
 ## Improvements
@@ -55,7 +56,8 @@ Modified based on [Assignment 3: Ray Tracing](https://github.com/ohnooj/computer
 
 ### Assets
 
-Models downloaded from Morgan McGuire's [Computer Graphics Archive](https://casual-effects.com/data)
+- Morgan McGuire's [Computer Graphics Archive](https://casual-effects.com/data)
+- [Poly Haven](https://polyhaven.com/)
 
 ### Materials
 

@@ -7,6 +7,7 @@
 #include <filesystem>
 #include <iostream>
 #include <limits>
+#include <memory>
 #include <span>
 
 #include "../material/Constant.h"
@@ -36,17 +37,8 @@ static T read_img_u8(const std::span<unsigned char> data_span, size_t i) {
 }
 
 template <typename T, float gamma>
-std::unique_ptr<Sampler<T>> read_texture(const std::filesystem::path& path,
-                                         T&& default_value) {
-    int width = 0;
-    int height = 0;
-    int channels = 0;
-    unsigned char* const data_raw =
-        stbi_load(path.c_str(), &width, &height, &channels, CHANNELS<T>);
-    if (!data_raw) {
-        std::cerr << "Failed to load texture: " << path << "\n";
-        return std::make_unique<Constant<T>>(std::forward<T>(default_value));
-    }
+std::unique_ptr<Texture<T>> read_texture_from_data(
+    const int width, const int height, unsigned char* const data_raw) {
     const std::span<unsigned char> data_span(
         data_raw, static_cast<size_t>(width * height * CHANNELS<T>));
     const auto num_pixels =
@@ -58,7 +50,41 @@ std::unique_ptr<Sampler<T>> read_texture(const std::filesystem::path& path,
         data.emplace_back(read_img_u8<T, gamma>(data_span, i));
     }
 
-    auto texture = std::make_unique<Texture<T>>(width, height, data);
+    return std::make_unique<Texture<T>>(width, height, std::move(data));
+}
+
+template <typename T, float gamma>
+std::unique_ptr<Texture<T>> read_texture(const std::filesystem::path& path) {
+    int width = 0;
+    int height = 0;
+    int channels = 0;
+    unsigned char* const data_raw =
+        stbi_load(path.c_str(), &width, &height, &channels, CHANNELS<T>);
+    if (!data_raw) {
+        std::cerr << "Failed to load texture: " << path << "\n";
+        return nullptr;
+    }
+
+    auto texture = read_texture_from_data<T, gamma>(width, height, data_raw);
+
+    stbi_image_free(data_raw);
+    return texture;
+}
+
+template <typename T, float gamma>
+std::unique_ptr<Sampler<T>> read_texture(const std::filesystem::path& path,
+                                         T&& default_value) {
+    int width = 0;
+    int height = 0;
+    int channels = 0;
+    unsigned char* const data_raw =
+        stbi_load(path.c_str(), &width, &height, &channels, CHANNELS<T>);
+    if (!data_raw) {
+        std::cerr << "Failed to load texture: " << path << "\n";
+        return std::make_unique<Constant<T>>(std::forward<T>(default_value));
+    }
+
+    auto texture = read_texture_from_data<T, gamma>(width, height, data_raw);
 
     stbi_image_free(data_raw);
     return texture;

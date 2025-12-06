@@ -1,10 +1,10 @@
 #include "Sphere.h"
 
+#include <Eigen/Dense>
 #include <numbers>
 #include <optional>
 
 #include "../util/random.h"
-#include "Eigen/Core"
 
 static const float EPSILON = 1e-6F;
 
@@ -53,6 +53,35 @@ Eigen::Vector3f Sphere::normal_at(const Ray& ray,
     Eigen::Vector3f n = (point - this->center).normalized();
     if (n.dot(ray.direction) > 0) n = -n;
     return n;
+}
+
+Eigen::Matrix3f Sphere::tangent_space_at(const Eigen::Vector3f& point,
+                                         const Eigen::Vector3f& normal) const {
+    const Eigen::Vector3f p = (point - this->center).normalized();
+
+    // x = r * cos(theta) * sin(phi)
+    // y = r * cos(phi)
+    // z = r * sin(theta) * sin(phi)
+
+    const float theta = std::atan2(p.z(), p.x());
+    const float phi = std::acos(p.y());
+
+    // d(p) / d(theta)
+    Eigen::Vector3f tangent =
+        Eigen::Vector3f{
+            -std::sin(theta) * std::sin(phi),
+            0.F,
+            std::cos(theta) * std::sin(phi),
+        }
+            .normalized();
+
+    // re-orthogonalize tangent
+    tangent = (tangent - normal * normal.dot(tangent)).normalized();
+    const Eigen::Vector3f bitangent = normal.cross(tangent).normalized();
+
+    Eigen::Matrix3f tbn;
+    tbn << tangent, bitangent, normal;
+    return tbn;
 }
 
 Eigen::Vector2f Sphere::texcoords_at(const Eigen::Vector3f& point) const {

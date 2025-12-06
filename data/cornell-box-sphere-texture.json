@@ -26,7 +26,8 @@
             "name": "material",
             "diffuse": "rusty_metal_04_2k/rusty_metal_04_diff_2k.jpg",
             "roughness": "rusty_metal_04_2k/rusty_metal_04_rough_2k.png",
-            "metallic": "rusty_metal_04_2k/rusty_metal_04_metal_2k.png"
+            "metallic": "rusty_metal_04_2k/rusty_metal_04_metal_2k.png",
+            "normal": "rusty_metal_04_2k/rusty_metal_04_nor_gl_2k.png"
         }
     ],
     "objects": [

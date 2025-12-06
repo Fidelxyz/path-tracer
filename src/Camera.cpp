@@ -24,9 +24,9 @@ Camera::Camera(Eigen::Vector3f position, const Eigen::Vector3f& rotation,
                  Eigen::AngleAxisf(yaw, Eigen::Vector3f::UnitY()) *
                  Eigen::AngleAxisf(pitch, Eigen::Vector3f::UnitX());
 
-    v = rot_matrix * Eigen::Vector3f::UnitY();
-    w = rot_matrix * Eigen::Vector3f::UnitZ();
-    u = v.cross(w);
+    v = rot_matrix * Eigen::Vector3f::UnitY();  // up
+    w = rot_matrix * Eigen::Vector3f::UnitZ();  // backward
+    u = v.cross(w);                             // right
 }
 
 Ray Camera::viewing_ray(const unsigned int i, const unsigned int j) const {

@@ -3,7 +3,6 @@
 #include <Eigen/Dense>
 
 #include "../util/random.h"
-#include "Eigen/Core"
 
 static const float EPSILON = 1e-6F;
 
@@ -26,6 +25,15 @@ Triangle::Triangle(std::array<Eigen::Vector3f, 3> vertices,
     d01 = edge1.dot(edge2);
     d11 = edge2.dot(edge2);
     inv_denom = 1.F / (d00 * d11 - d01 * d01);
+
+    // Precompute tangent
+    // https://learnopengl.com/Advanced-Lighting/Normal-Mapping
+    const Eigen::Vector2f delta_uv1 = texcoords[1] - texcoords[0];
+    const Eigen::Vector2f delta_uv2 = texcoords[2] - texcoords[0];
+    const float f =
+        1.0F / (delta_uv1.x() * delta_uv2.y() - delta_uv2.x() * delta_uv1.y());
+    tangent =
+        (f * (delta_uv2.y() * edge1 - delta_uv1.y() * edge2)).normalized();
 
     edges = {std::move(edge1), std::move(edge2)};
 }
@@ -88,6 +96,18 @@ Eigen::Vector3f Triangle::normal_at(const Ray& ray,
         n = -n;
     }
     return n;
+}
+
+Eigen::Matrix3f Triangle::tangent_space_at(
+    const Eigen::Vector3f& /*point*/, const Eigen::Vector3f& normal) const {
+    // re-orthogonalize the TBN vectors
+    const Eigen::Vector3f tangent =
+        (this->tangent - normal * normal.dot(this->tangent)).normalized();
+    const Eigen::Vector3f bitangent = normal.cross(tangent).normalized();
+
+    Eigen::Matrix3f tbn;
+    tbn << tangent, bitangent, normal;
+    return tbn;
 }
 
 Eigen::Vector2f Triangle::texcoords_at(const Eigen::Vector3f& point) const {

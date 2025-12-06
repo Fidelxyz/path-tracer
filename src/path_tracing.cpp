@@ -29,11 +29,22 @@ static Eigen::Vector3f path_trace(const Ray& ray, const Scene& scene,
     const Intersection intersection = scene.geometries->intersect(ray);
     if (!intersection.has_intersection()) return Eigen::Vector3f::Zero();
 
-    Eigen::Vector3f surface_point = ray.origin + intersection.t * ray.direction;
-    const Eigen::Vector3f normal =
-        intersection.object->normal_at(ray, surface_point);
+    const Eigen::Vector3f surface_point =
+        ray.origin + intersection.t * ray.direction;
+    Eigen::Vector3f normal = intersection.object->normal_at(ray, surface_point);
     const Eigen::Vector2f texcoords =
         intersection.object->texcoords_at(surface_point);
+
+    // Apply normal mapping
+    if (intersection.object->material->normal) {
+        Eigen::Vector3f normal_local =
+            intersection.object->material->normal->sample(texcoords);
+        normal_local =
+            ((2 * normal_local) - Eigen::Vector3f::Ones()).normalized();
+        const Eigen::Matrix3f tbn =
+            intersection.object->tangent_space_at(surface_point, normal);
+        normal = (tbn * normal_local).normalized();
+    }
 
     // Contribution from a light source
     const auto sample_direct = [&]() -> Eigen::Vector3f {
