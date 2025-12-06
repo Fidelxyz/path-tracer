@@ -7,11 +7,9 @@
 #include "Ray.h"
 
 /**
- * Given a ray and its hit in the scene, return the Disney Principled BRDF
- * contribution over all _visible_ light sources (e.g., take into account
- * shadows). Use a hard-coded value of ia=0.1 for ambient light.
+ * Compute the Cook-Torrance BRDF value.
  *
- * @param view_to_surface ray from the camera/viewpoint to the surface hit.
+ * @param view_to_surface ray from the source to the surface hit.
  * @param surface_to_light ray from the surface hit to the light source.
  * @param view_intersection intersection information of the view ray.
  * @param normal Unit normal vector at the surface hit point.
@@ -25,8 +23,9 @@ Eigen::Vector3f brdf(const Ray& view_to_surface, const Ray& surface_to_light,
 
 /**
  * Sample a direction according to the importance distribution defined by the
- * BRDF.
- * @param view_to_surface ray from the camera/viewpoint to the surface hit.
+ * Cook-Torrance BRDF.
+ *
+ * @param view_to_surface ray from the source to the surface hit.
  * @param view_intersection intersection information of the view ray.
  * @param surface_point Position of the surface hit point.
  * @param normal Unit normal vector at the surface hit point.
@@ -41,9 +40,9 @@ Ray brdf_sample(const Ray& view_to_surface,
 
 /**
  * Compute the PDF of sampling a given direction according to the importance
- * distribution defined by the BRDF.
+ * distribution defined by the Cook-Torrance BRDF.
  *
- * @param view_to_surface ray from the camera/viewpoint to the surface hit.
+ * @param view_to_surface ray from the source to the surface hit.
  * @param surface_to_light ray from the surface hit to the light source.
  * @param view_intersection intersection information of the view ray.
  * @param normal Unit normal vector at the surface hit point.

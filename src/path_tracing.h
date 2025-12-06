@@ -1,17 +1,17 @@
-#ifndef RAYCOLOR_H
-#define RAYCOLOR_H
+#ifndef PATH_TRACING_H
+#define PATH_TRACING_H
 
 #include <Eigen/Core>
 
 #include "Scene.h"
 
 /**
- * Shoots a ray into a lit scene and collects color information.
+ * Samples the color along a ray in the scene.
  *
- * @param ray The ray along which to search.
- * @param scene The scene containing objects and lights.
+ * @param ray The ray to be traced.
+ * @param scene The scene.
  *
- * @return The collected color as an Eigen::Vector3f.
+ * @return The sampled color.
  */
 Eigen::Vector3f sample(const Ray& ray, const Scene& scene);
 

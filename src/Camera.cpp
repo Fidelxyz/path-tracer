@@ -1,5 +1,6 @@
 #include "Camera.h"
 
+#include <Eigen/Geometry>
 #include <numbers>
 
 #include "util/random.h"

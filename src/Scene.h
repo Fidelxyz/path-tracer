@@ -1,10 +1,7 @@
 #ifndef SCENE_H
 #define SCENE_H
 
-#include <cassert>
-
 #include "Camera.h"
-#include "Object.h"
 #include "Options.h"
 #include "geometry/Geometry.h"
 #include "light/Light.h"
