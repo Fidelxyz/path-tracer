@@ -102,7 +102,7 @@ static std::unique_ptr<Texture<T>> parse_sampler(
 template <typename T, float gamma>
 static std::unique_ptr<Sampler<T>> parse_sampler(
     const json& jmat, const std::string_view key,
-    const std::filesystem::path& base_path, T&& default_value) {
+    const std::filesystem::path& base_path, auto&& default_value) {
     if (jmat.contains(key) && jmat[key].is_string()) {
         return read_texture<T, gamma>(base_path / jmat[key],
                                       std::forward<T>(default_value));
@@ -230,7 +230,6 @@ static std::vector<std::unique_ptr<Geometry>> parse_geometries(
             std::cout << "Unknown object type: " << jobj.at("type") << "\n";
         }
     }
-    objects.shrink_to_fit();
     return objects;
 }
 

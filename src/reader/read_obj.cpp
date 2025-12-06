@@ -5,7 +5,6 @@
 #include <Eigen/Core>
 #include <Eigen/Dense>
 #include <cassert>
-#include <exception>
 #include <iostream>
 
 #include "../geometry/Triangle.h"
@@ -152,11 +151,12 @@ static std::unique_ptr<Texture<T>> parse_sampler(
 template <typename T, float gamma>
 static std::unique_ptr<Sampler<T>> parse_sampler(
     const std::filesystem::path& base_path, const std::string_view texture,
-    T constant) {
+    auto&& constant) {
     if (texture.empty()) {
-        return std::make_unique<Constant<T>>(std::move(constant));
+        return std::make_unique<Constant<T>>(std::forward<T>(constant));
     }
-    return read_texture<T, gamma>(base_path / texture, std::move(constant));
+    return read_texture<T, gamma>(base_path / texture,
+                                  std::forward<T>(constant));
 }
 
 }  // namespace
@@ -164,13 +164,13 @@ static std::unique_ptr<Sampler<T>> parse_sampler(
 std::vector<std::unique_ptr<Geometry>> read_obj(
     const std::filesystem::path& obj_file) {
     const auto compute_smoothing_shapes =
-        [&](const tinyobj::attrib_t& inattrib,
-            const std::vector<tinyobj::shape_t>& in_shapes)
+        [&](const tinyobj::attrib_t& attrib,
+            const std::vector<tinyobj::shape_t>& shapes)
         -> std::tuple<std::vector<tinyobj::shape_t>, tinyobj::attrib_t> {
         std::vector<tinyobj::shape_t> out_shapes;
         tinyobj::attrib_t out_attrib;
 
-        for (const auto& shape : in_shapes) {
+        for (const auto& shape : shapes) {
             const auto num_faces = static_cast<unsigned int>(
                 shape.mesh.smoothing_group_ids.size());
             assert(num_faces != 0);
@@ -184,21 +184,21 @@ std::vector<std::unique_ptr<Geometry>> read_obj(
 
             unsigned int active_id = sorted_ids[0].first;
             unsigned int id = active_id;
-            unsigned int idbegin = 0;
-            unsigned int idend = 0;
+            unsigned int id_begin = 0;
+            unsigned int id_end = 0;
             // Faces are now bundled by smoothing group id, create shapes
             // from these.
-            while (idbegin < num_faces) {
+            while (id_begin < num_faces) {
                 // Find the end of the current smoothing group id block.
-                while (active_id == id && ++idend < num_faces) {
-                    id = sorted_ids[idend].first;
+                while (active_id == id && ++id_end < num_faces) {
+                    id = sorted_ids[id_end].first;
                 }
 
-                compute_smoothing_shape(inattrib, shape, sorted_ids, idbegin,
-                                        idend, out_shapes, out_attrib);
+                compute_smoothing_shape(attrib, shape, sorted_ids, id_begin,
+                                        id_end, out_shapes, out_attrib);
 
                 active_id = id;
-                idbegin = idend;
+                id_begin = id_end;
             }
         }
 
