@@ -189,7 +189,7 @@ float brdf_pdf(const Ray& view_to_surface, const Ray& surface_to_light,
     const float n_dot_h = std::max(normal.dot(h), 0.F);
     const float n_dot_l = normal.dot(surface_to_light.direction);
     const float n_dot_v = std::max(normal.dot(-view_to_surface.direction), 0.F);
-    const float h_dot_l = h.dot(surface_to_light.direction);
+    const float h_dot_l = std::max(h.dot(surface_to_light.direction), 0.F);
 
     // PDF for diffuse component (cosine-weighted hemisphere)
     const float pdf_diffuse = n_dot_l / PI;
@@ -197,9 +197,9 @@ float brdf_pdf(const Ray& view_to_surface, const Ray& surface_to_light,
     // PDF for specular component (GGX)
     const float a = pow2(roughness);  // a = roughness^2
     const float a2 = pow2(a);
-    const float pdf_specular = (a2 * n_dot_h) /
-                               (PI * pow2(pow2(n_dot_h) * (a2 - 1) + 1)) /
-                               (4 * h_dot_l);
+    const float pdf_specular =
+        (a2 * n_dot_h) / (PI * pow2(pow2(n_dot_h) * (a2 - 1) + 1) + EPSILON) /
+        (4 * h_dot_l + EPSILON);
 
     const auto [weight_diffuse, weight_specular] =
         weight_diffuse_specular(diffuse, metallic, n_dot_v);
