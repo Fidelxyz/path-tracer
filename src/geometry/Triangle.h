@@ -24,8 +24,8 @@ class Triangle : public Geometry {
 
     [[nodiscard]] Ray ray_from(Eigen::Vector3f point) const override;
 
-    [[nodiscard]] float pdf(const Ray& ray,
-                            const float distance) const override;
+    [[nodiscard]] float inv_pdf(const Ray& ray,
+                                const float distance) const override;
 
     std::array<Eigen::Vector3f, 3> vertices;
     std::array<Eigen::Vector3f, 3> normals;

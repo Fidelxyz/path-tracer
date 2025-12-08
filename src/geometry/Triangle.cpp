@@ -140,7 +140,7 @@ Ray Triangle::ray_from(Eigen::Vector3f point) const {
     return {std::move(point), direction, 0.F, distance};
 }
 
-float Triangle::pdf(const Ray& ray, const float distance) const {
+float Triangle::inv_pdf(const Ray& ray, const float distance) const {
     const Eigen::Vector3f point = ray.origin + ray.direction * distance;
     const auto [u, v, w] = barycentric_coordinates(point);
     const auto normal =

@@ -27,17 +27,18 @@ class Object {
     }
 
     /**
-     * Compute the probability density function (PDF) value for sampling a point
-     * from all points on this object.
+     * Compute the multiplication inverse of the probability density function
+     * (PDF) value for sampling a direction toward the object from all
+     * directions to the object.
      *
      * @param [in] ray Ray from the point of view.
      * @param [in] distance Distance to the sampled point on the object.
      * @return PDF value.
      */
-    [[nodiscard]] virtual float pdf(
+    [[nodiscard]] virtual float inv_pdf(
         [[maybe_unused]] const Ray& ray,
         [[maybe_unused]] const float distance) const {
-        throw std::runtime_error("pdf() not implemented for this object.");
+        throw std::runtime_error("inv_pdf() not implemented for this object.");
     }
 
     /**

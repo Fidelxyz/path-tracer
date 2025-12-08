@@ -68,13 +68,13 @@ static Eigen::Vector3f path_trace(const Ray& ray, const Scene& scene,
         if (ray_to_light_intersection.has_intersection())
             return Eigen::Vector3f::Zero();
 
-        const float pdf = light->pdf(ray_to_light, distance);
+        const float inv_pdf = light->inv_pdf(ray_to_light, distance);
         const auto brdf_value =
             brdf(ray, ray_to_light, intersection, normal, texcoords);
 
-        // emission * brdf * cos_theta / (1 / pdf / num_lights)
+        // emission * brdf * cos_theta / (pdf / num_lights)
         return light->emission_at(texcoords).cwiseProduct(brdf_value) *
-               cos_theta * pdf * num_lights;
+               cos_theta * inv_pdf * num_lights;
     };
 
     // Contribution from indirect lighting

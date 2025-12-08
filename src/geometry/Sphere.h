@@ -22,8 +22,8 @@ class Sphere : public Geometry {
 
     [[nodiscard]] Ray ray_from(Eigen::Vector3f point) const override;
 
-    [[nodiscard]] float pdf(const Ray& ray,
-                            const float distance) const override;
+    [[nodiscard]] float inv_pdf(const Ray& ray,
+                                const float distance) const override;
 
     Eigen::Vector3f center;
     float radius;

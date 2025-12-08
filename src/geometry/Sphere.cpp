@@ -110,7 +110,7 @@ Ray Sphere::ray_from(const Eigen::Vector3f point) const {
     return {point, direction, 0.F, distance};
 }
 
-float Sphere::pdf(const Ray& /*ray*/, const float distance) const {
+float Sphere::inv_pdf(const Ray& /*ray*/, const float distance) const {
     return (std::numbers::pi_v<float> * radius * radius) /
            (distance * distance);
 }
