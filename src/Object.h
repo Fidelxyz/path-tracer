@@ -23,7 +23,7 @@ class Object {
      */
     [[nodiscard]] virtual Ray ray_from(
         [[maybe_unused]] const Eigen::Vector3f point) const {
-        throw std::runtime_error("ray_from() not implemented for this object.");
+        throw std::logic_error("ray_from() not implemented for this object.");
     }
 
     /**
@@ -38,7 +38,7 @@ class Object {
     [[nodiscard]] virtual float inv_pdf(
         [[maybe_unused]] const Ray& ray,
         [[maybe_unused]] const float distance) const {
-        throw std::runtime_error("inv_pdf() not implemented for this object.");
+        throw std::logic_error("inv_pdf() not implemented for this object.");
     }
 
     /**
@@ -49,7 +49,8 @@ class Object {
      */
     [[nodiscard]] virtual Eigen::Vector3f emission_at(
         [[maybe_unused]] const Eigen::Vector2f& texcoords) const {
-        throw std::runtime_error("emission() not implemented for this object.");
+        throw std::logic_error(
+            "emission_at() not implemented for this object.");
     }
 };
 

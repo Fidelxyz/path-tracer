@@ -17,12 +17,10 @@ Eigen::Vector3f AABB::center() const { return (min_corner + max_corner) / 2; }
 Eigen::Vector3f AABB::dimensions() const { return max_corner - min_corner; }
 
 bool AABB::intersect(const Ray& ray) const {
-    const Eigen::Vector3f t1 =
-        (min_corner - ray.origin).cwiseProduct(ray.inv_direction);
-    const Eigen::Vector3f t2 =
-        (max_corner - ray.origin).cwiseProduct(ray.inv_direction);
+    // As tested, leaving auto to lazy evaluate is faster.
+    const auto t1 = (min_corner - ray.origin).cwiseProduct(ray.inv_direction);
+    const auto t2 = (max_corner - ray.origin).cwiseProduct(ray.inv_direction);
 
-    // Lazy evaluation
     const auto t_min_vec = t1.cwiseMin(t2);
     const auto t_max_vec = t1.cwiseMax(t2);
 

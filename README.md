@@ -23,7 +23,7 @@ Modified from [Assignment 3: Ray Tracing](https://github.com/ohnooj/computer-gra
   - BSDF importance sampling (Both of cosine-weighted hemisphere distribution and GGX distribution).
 - **Physically-based BRDF** (Cook-Torrance Model). ([`brdf.cpp`](src/brdf.cpp))
 - BVH Accelerated. ([`bvh/AABBTree.cpp`](src/bvh/AABBTree.cpp) & [`bvh/AABB.cpp`](src/bvh/AABB.cpp))
-- Texture mapping. ([`material/texture.h`](src/material/texture.h))
+- Texture mapping. ([`material/Texture.h`](src/material/Texture.h))
 - Normal mapping. ([`path_tracing.cpp`](src/path_tracing.cpp))
 - Anti-alising by dithering sensor pixels. ([`Camera.cpp`](src/Camera.cpp))
 - Gamma correction. ([`main.cpp`](src/main.cpp) & [`reader/gamma_transform.h`](src/reader/gamma_transform.h))

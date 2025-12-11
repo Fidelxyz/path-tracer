@@ -34,8 +34,7 @@ class Geometry : public Object {
     [[nodiscard]] virtual Eigen::Vector3f normal_at(
         [[maybe_unused]] const Ray& ray,
         [[maybe_unused]] const Eigen::Vector3f& point) const {
-        throw std::runtime_error(
-            "normal_at() not implemented for this object.");
+        throw std::logic_error("normal_at() not implemented for this object.");
     }
 
     /**
@@ -50,7 +49,7 @@ class Geometry : public Object {
     [[nodiscard]] virtual Eigen::Matrix3f tangent_space_at(
         [[maybe_unused]] const Eigen::Vector3f& point,
         [[maybe_unused]] const Eigen::Vector3f& normal) const {
-        throw std::runtime_error(
+        throw std::logic_error(
             "tangent_space_at() not implemented for this object.");
     }
 
@@ -62,7 +61,7 @@ class Geometry : public Object {
      */
     [[nodiscard]] virtual Eigen::Vector2f texcoords_at(
         [[maybe_unused]] const Eigen::Vector3f& point) const {
-        throw std::runtime_error(
+        throw std::logic_error(
             "texcoords_at() not implemented for this object.");
     }
 

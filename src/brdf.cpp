@@ -9,7 +9,6 @@
 
 #include <Eigen/Dense>
 #include <numbers>
-#include <random>
 
 #include "geometry/Geometry.h"
 #include "util/random.h"
@@ -77,7 +76,7 @@ Eigen::Vector3f brdf(const Ray& view_to_surface, const Ray& surface_to_light,
                      const Eigen::Vector2f& texcoords) {
     const auto& material = view_intersection.object->material;
 
-    const Eigen::Vector3f& mat_diffuse = material->diffuse->sample(texcoords);
+    const Eigen::Vector3f mat_diffuse = material->diffuse->sample(texcoords);
     const float mat_roughness = material->roughness->sample(texcoords);
     const float mat_metallic = material->metallic->sample(texcoords);
 
@@ -180,7 +179,7 @@ float brdf_pdf(const Ray& view_to_surface, const Ray& surface_to_light,
                const Eigen::Vector3f& normal,
                const Eigen::Vector2f& texcoords) {
     const auto& material = view_intersection.object->material;
-    const Eigen::Vector3f& diffuse = material->diffuse->sample(texcoords);
+    const Eigen::Vector3f diffuse = material->diffuse->sample(texcoords);
     const float roughness = material->roughness->sample(texcoords);
     const float metallic = material->metallic->sample(texcoords);
 
