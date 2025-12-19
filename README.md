@@ -4,14 +4,6 @@
 
 ![](img/piece_1.png)
 
-> **Personal Information**
->
-> Name: Fidel Yin
->
-> UtorID: yinhaofe
->
-> Student Number: 1009991412
-
 Modified from [Assignment 3: Ray Tracing](https://github.com/ohnooj/computer-graphics-ray-tracing), but rewrote most of the codes.
 
 ## Features
